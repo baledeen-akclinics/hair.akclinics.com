@@ -10,8 +10,11 @@
   var SUCCESS_MSG = 'Thank you! Your request has been submitted. Our team will contact you shortly.';
 
   function attributionPayload() {
-    if (window.AKLandingTracking && typeof window.AKLandingTracking.getAttribution === 'function') {
-      return window.AKLandingTracking.getAttribution() || {};
+    if (typeof window.getLeadAttributionForApi === 'function') {
+      return window.getLeadAttributionForApi() || {};
+    }
+    if (typeof window.getLeadAttributionCookie === 'function') {
+      return window.getLeadAttributionCookie() || {};
     }
     return {};
   }

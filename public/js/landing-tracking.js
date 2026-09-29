@@ -1,154 +1,715 @@
 /**
- * Landing page tracking: capture UTMs / click IDs, persist first-touch,
- * refresh last-touch. No API secrets here.
+ * Lead Attribution System
+ * First-touch + last-touch UTM / click-ID capture → cookie → form hidden fields
  */
-(function (window, document) {
+(function () {
   'use strict';
 
-  var STORAGE_KEY = 'ak_landing_attribution';
-  var COOKIE_DAYS = 90;
+  // ---- Configuration ----
+  var COOKIE_NAME = 'lead_attribution';
+  var COOKIE_DAYS = 30;
+  var ATTRIBUTION_PARAMS = [
+    'campaign_id',
+    'utm_source',
+    'utm_medium',
+    'utm_campaign',
+    'utm_content',
+    'utm_term',
+    'gclid',
+    'fbclid'
+  ];
+  var FIRST_TOUCH_FIELDS = [
+    'first_touch_source',
+    'first_touch_medium',
+    'first_touch_channel',
+    'first_touch_campaign',
+    'first_touch_referrer',
+    'first_touch_landing_page',
+    'first_touch_at'
+  ];
+  var LAST_TOUCH_FIELDS = [
+    'last_touch_source',
+    'last_touch_medium',
+    'last_touch_channel',
+    'last_touch_campaign',
+    'last_touch_referrer',
+    'last_touch_landing_page',
+    'last_touch_at'
+  ];
+  // Hidden form fields that receive cookie values on submit
+  var FORM_FIELDS = ATTRIBUTION_PARAMS.concat(
+    ['landing_page', 'referrer']
+  ).concat(FIRST_TOUCH_FIELDS).concat(LAST_TOUCH_FIELDS);
 
-  function nowIso() {
-    return new Date().toISOString();
+  var SOCIAL_SOURCES = [
+    'facebook', 'fb', 'instagram', 'ig', 'meta',
+    'twitter', 'x', 'linkedin', 'pinterest', 'tiktok',
+    'youtube', 'snapchat', 'reddit'
+  ];
+  var SEARCH_SOURCES = ['google', 'bing', 'yahoo', 'duckduckgo', 'baidu'];
+  var PAID_MEDIA = [
+    'cpc', 'ppc', 'paid', 'paid-search', 'paid_search',
+    'cpm', 'cpa', 'cpl', 'paid-social', 'paid_social', 'display'
+  ];
+
+  /**
+   * Server-rendered timestamp from PHP (app timezone).
+   * Attribution must not use the browser clock.
+   * @returns {string}
+   */
+  function getAttributionTimestamp() {
+    return (typeof window !== 'undefined' && window.__LEAD_ATTRIBUTION_SERVER_TIME__)
+      ? String(window.__LEAD_ATTRIBUTION_SERVER_TIME__)
+      : '';
   }
 
-  function getParam(name) {
+  // ============================================================
+  // Cookie helpers
+  // ============================================================
+
+  /**
+   * Write the lead_attribution cookie (JSON payload, 30-day expiry).
+   * @param {Object} data - Attribution object to store
+   */
+  function setLeadAttributionCookie(data) {
+    var expires = new Date();
+    expires.setTime(expires.getTime() + (COOKIE_DAYS * 24 * 60 * 60 * 1000));
+    var value = encodeURIComponent(JSON.stringify(data));
+    document.cookie =
+      COOKIE_NAME + '=' + value +
+      '; expires=' + expires.toUTCString() +
+      '; path=/' +
+      '; SameSite=Lax';
+  }
+
+  /**
+   * Read and parse the lead_attribution cookie.
+   * @returns {Object|null} Parsed attribution data, or null if missing/invalid
+   */
+  function getLeadAttributionCookie() {
+    var nameEQ = COOKIE_NAME + '=';
+    var parts = document.cookie.split(';');
+    for (var i = 0; i < parts.length; i++) {
+      var c = parts[i].replace(/^\s+/, '');
+      if (c.indexOf(nameEQ) === 0) {
+        try {
+          return JSON.parse(decodeURIComponent(c.substring(nameEQ.length)));
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  // Expose helpers globally for reuse elsewhere on the site
+  window.setLeadAttributionCookie = setLeadAttributionCookie;
+  window.getLeadAttributionCookie = getLeadAttributionCookie;
+
+  // ============================================================
+  // Channel + touch helpers
+  // ============================================================
+
+  function includesAny(value, list) {
+    if (!value) {
+      return false;
+    }
+    for (var i = 0; i < list.length; i++) {
+      if (value === list[i] || value.indexOf(list[i]) !== -1) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  function normalizeHost(host) {
+    return (host || '').toLowerCase().replace(/^www\./, '');
+  }
+
+  function getUrlHost(url) {
+    if (!url) {
+      return '';
+    }
     try {
-      return new URLSearchParams(window.location.search).get(name) || '';
+      return normalizeHost(new URL(url).hostname);
     } catch (e) {
       return '';
     }
   }
 
-  function readStore() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : null;
-    } catch (e) {
-      return null;
+  function hostIs(host, domain) {
+    return host === domain || host.slice(-(domain.length + 1)) === '.' + domain;
+  }
+
+  /**
+   * Own-site referrers must not become a marketing source
+   * (that produced "akclinics.com • referral" in the CRM).
+   */
+  function isInternalHost(host) {
+    if (!host) {
+      return false;
     }
+    var current = normalizeHost(window.location.hostname);
+    if (host === current) {
+      return true;
+    }
+    return host === 'akclinics.in' ||
+      host === 'akclinics.com' ||
+      host === 'akclinics.org' ||
+      hostIs(host, 'akclinics.in') ||
+      hostIs(host, 'akclinics.com') ||
+      hostIs(host, 'akclinics.org');
   }
 
-  function writeStore(data) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch (e) { /* ignore */ }
-
-    try {
-      var expires = new Date();
-      expires.setDate(expires.getDate() + COOKIE_DAYS);
-      document.cookie = STORAGE_KEY + '=' + encodeURIComponent(JSON.stringify(data))
-        + ';expires=' + expires.toUTCString()
-        + ';path=/;SameSite=Lax';
-    } catch (e) { /* ignore */ }
+  function isGoogleSearchHost(host) {
+    return /^google\.(com|[a-z]{2}|co\.[a-z]{2}|com\.[a-z]{2})$/.test(host) ||
+      host === 'search.google.com';
   }
 
-  function inferChannel(source, medium) {
-    source = (source || '').toLowerCase();
-    medium = (medium || '').toLowerCase();
-    if (medium === 'cpc' || medium === 'ppc' || medium === 'paid') {
-      if (source.indexOf('facebook') >= 0 || source.indexOf('fb') >= 0 || source.indexOf('ig') >= 0) {
-        return 'paid_social';
-      }
+  function isGoogleAdsHost(host) {
+    return hostIs(host, 'googleadservices.com') ||
+      hostIs(host, 'googlesyndication.com') ||
+      host.indexOf('doubleclick.net') !== -1;
+  }
+
+  /**
+   * Infer source/medium from document.referrer when the URL has no UTM/click-IDs.
+   * Returns direct for empty or internal referrers — never Google unless the
+   * referrer host is actually Google.
+   * @param {string} referrer
+   * @returns {{source: string, medium: string}}
+   */
+  function inferFromReferrer(referrer) {
+    var host = getUrlHost(referrer);
+    if (!host || isInternalHost(host)) {
+      return { source: 'direct', medium: 'none' };
+    }
+
+    var path = '';
+    try {
+      path = new URL(referrer).pathname.toLowerCase();
+    } catch (e) {
+      path = '';
+    }
+
+    if (isGoogleAdsHost(host) || (isGoogleSearchHost(host) && path.indexOf('/aclk') === 0)) {
+      return { source: host, medium: 'cpc' };
+    }
+    if (isGoogleSearchHost(host)) {
+      return { source: host, medium: 'organic' };
+    }
+    if (hostIs(host, 'bing.com')) {
+      return { source: host, medium: 'organic' };
+    }
+    if (hostIs(host, 'yahoo.com')) {
+      return { source: host, medium: 'organic' };
+    }
+    if (hostIs(host, 'duckduckgo.com')) {
+      return { source: host, medium: 'organic' };
+    }
+    if (hostIs(host, 'baidu.com')) {
+      return { source: host, medium: 'organic' };
+    }
+
+    if (hostIs(host, 'facebook.com') || hostIs(host, 'fb.com') || host === 'fb.me') {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'instagram.com')) {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'linkedin.com') || host === 'lnkd.in') {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'twitter.com') || hostIs(host, 'x.com') || host === 't.co') {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'youtube.com') || host === 'youtu.be') {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'tiktok.com')) {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'pinterest.com')) {
+      return { source: host, medium: 'social' };
+    }
+    if (hostIs(host, 'reddit.com')) {
+      return { source: host, medium: 'social' };
+    }
+
+    return { source: host, medium: 'referral' };
+  }
+
+  /**
+   * Derive a marketing channel from source / medium / click IDs.
+   * @param {string} source
+   * @param {string} medium
+   * @param {string} [gclid]
+   * @param {string} [fbclid]
+   * @returns {string}
+   */
+  function deriveChannel(source, medium, gclid, fbclid) {
+    var src = (source || '').toLowerCase();
+    var med = (medium || '').toLowerCase();
+    var isSocial = includesAny(src, SOCIAL_SOURCES) ||
+      med === 'social' || med === 'paid-social' || med === 'paid_social';
+    var isSearch = includesAny(src, SEARCH_SOURCES);
+    var isPaid = includesAny(med, PAID_MEDIA) || !!gclid || !!fbclid;
+
+    if (gclid) {
       return 'paid_search';
     }
-    if (medium === 'organic' || source === 'google' && !medium) return 'organic_search';
-    if (medium === 'referral') return 'referral';
-    if (medium === 'email') return 'email';
-    if (!source && !medium) return 'direct';
-    return medium || 'other';
+    if (fbclid) {
+      return 'paid_social';
+    }
+    if (isSocial && isPaid) {
+      return 'paid_social';
+    }
+    if (isSearch && isPaid) {
+      return 'paid_search';
+    }
+    if (med === 'cpc' || med === 'ppc' || med === 'paid') {
+      return isSocial ? 'paid_social' : 'paid_search';
+    }
+    if (med === 'display' || med === 'banner' || med === 'cpm') {
+      return 'display';
+    }
+    if (med === 'email') {
+      return 'email';
+    }
+    if (med === 'affiliate' || med === 'affiliates') {
+      return 'affiliate';
+    }
+    if (med === 'referral' || med === 'referrer') {
+      return 'referral';
+    }
+    if (isSocial) {
+      return 'organic_social';
+    }
+    if (isSearch || med === 'organic') {
+      return 'organic_search';
+    }
+    if (!src && !med) {
+      return 'direct';
+    }
+    if (src === 'direct' || med === 'none' || med === '(none)') {
+      return 'direct';
+    }
+    return med || src || 'other';
   }
 
-  function currentTouch() {
-    var utmSource = getParam('utm_source');
-    var utmMedium = getParam('utm_medium');
-    var utmCampaign = getParam('utm_campaign');
-    var utmContent = getParam('utm_content');
-    var utmTerm = getParam('utm_term');
-    var gclid = getParam('gclid');
-    var fbclid = getParam('fbclid');
-
-    if (gclid && !utmSource) {
-      utmSource = 'google';
-      utmMedium = utmMedium || 'cpc';
+  /**
+   * Infer source/medium from click IDs, then from referrer if still unknown.
+   * UTM params and gclid/fbclid always win over the referrer.
+   */
+  function resolveSourceMedium(params, referrer) {
+    var source = (params && params.utm_source) || '';
+    var medium = (params && params.utm_medium) || '';
+    if (!source && params && params.gclid) {
+      source = 'google';
     }
-    if (fbclid && !utmSource) {
-      utmSource = 'facebook';
-      utmMedium = utmMedium || 'cpc';
+    if (!source && params && params.fbclid) {
+      source = 'facebook';
     }
+    if (!medium && params && (params.gclid || params.fbclid)) {
+      medium = 'cpc';
+    }
+    if (!source && !medium) {
+      var inferred = inferFromReferrer(referrer || '');
+      source = inferred.source;
+      medium = inferred.medium;
+    }
+    return { source: source, medium: medium };
+  }
 
-    var hasMarketing = !!(utmSource || utmMedium || utmCampaign || gclid || fbclid);
-
+  /**
+   * Build a first/last-touch snapshot from the current attributed visit.
+   * @param {Object} urlParams
+   * @param {string} timestamp ISO-8601
+   * @returns {Object}
+   */
+  function buildTouchSnapshot(urlParams, timestamp) {
+    var params = urlParams || {};
+    var resolved = resolveSourceMedium(params, document.referrer);
     return {
-      hasMarketing: hasMarketing,
-      source: utmSource || (hasMarketing ? '' : 'direct'),
-      medium: utmMedium || (hasMarketing ? '' : 'none'),
-      channel: inferChannel(utmSource, utmMedium),
-      campaign: utmCampaign,
+      source: resolved.source,
+      medium: resolved.medium,
+      channel: deriveChannel(resolved.source, resolved.medium, params.gclid, params.fbclid),
+      campaign: params.utm_campaign || '',
       referrer: document.referrer || '',
-      landing_page: window.location.href.split('#')[0],
-      at: nowIso(),
-      utm_source: utmSource,
-      utm_medium: utmMedium,
-      utm_campaign: utmCampaign,
-      utm_content: utmContent,
-      utm_term: utmTerm,
-      gclid: gclid,
-      fbclid: fbclid
+      landing_page: window.location.href,
+      at: timestamp
     };
   }
 
-  function ensureAttribution() {
-    var touch = currentTouch();
-    var stored = readStore() || {};
-    var updated = false;
-
-    if (!stored.first_touch_at) {
-      stored.first_touch_source = touch.source || null;
-      stored.first_touch_medium = touch.medium || null;
-      stored.first_touch_channel = touch.channel || null;
-      stored.first_touch_campaign = touch.campaign || null;
-      stored.first_touch_referrer = touch.referrer || null;
-      stored.first_touch_landing_page = touch.landing_page || null;
-      stored.first_touch_at = touch.at;
-      updated = true;
-    }
-
-    if (touch.hasMarketing || !stored.last_touch_at) {
-      stored.last_touch_source = touch.source || stored.last_touch_source || null;
-      stored.last_touch_medium = touch.medium || stored.last_touch_medium || null;
-      stored.last_touch_channel = touch.channel || stored.last_touch_channel || null;
-      stored.last_touch_campaign = touch.campaign || stored.last_touch_campaign || null;
-      stored.last_touch_referrer = touch.referrer || stored.last_touch_referrer || null;
-      stored.last_touch_landing_page = touch.landing_page || stored.last_touch_landing_page || null;
-      stored.last_touch_at = touch.at;
-      updated = true;
-    }
-
-    if (touch.utm_source) { stored.utm_source = touch.utm_source; updated = true; }
-    if (touch.utm_medium) { stored.utm_medium = touch.utm_medium; updated = true; }
-    if (touch.utm_campaign) { stored.utm_campaign = touch.utm_campaign; updated = true; }
-    if (touch.utm_content) { stored.utm_content = touch.utm_content; updated = true; }
-    if (touch.utm_term) { stored.utm_term = touch.utm_term; updated = true; }
-    if (touch.gclid) { stored.gclid = touch.gclid; updated = true; }
-    if (touch.fbclid) { stored.fbclid = touch.fbclid; updated = true; }
-
-    if (updated) writeStore(stored);
-    return stored;
+  function applyFirstTouch(data, touch) {
+    data.first_touch_source = touch.source;
+    data.first_touch_medium = touch.medium;
+    data.first_touch_channel = touch.channel;
+    data.first_touch_campaign = touch.campaign;
+    data.first_touch_referrer = touch.referrer;
+    data.first_touch_landing_page = touch.landing_page;
+    data.first_touch_at = touch.at;
   }
 
-  function getAttribution() {
-    return ensureAttribution();
+  function applyLastTouch(data, touch) {
+    data.last_touch_source = touch.source;
+    data.last_touch_medium = touch.medium;
+    data.last_touch_channel = touch.channel;
+    data.last_touch_campaign = touch.campaign;
+    data.last_touch_referrer = touch.referrer;
+    data.last_touch_landing_page = touch.landing_page;
+    data.last_touch_at = touch.at;
   }
 
-  window.AKLandingTracking = {
-    getAttribution: getAttribution,
-    ensure: ensureAttribution
+  function hasFirstTouch(data) {
+    return !!(data && data.first_touch_at);
+  }
+
+  /**
+   * Direct / none is a weak placeholder — safe to upgrade when a real
+   * marketing signal (Google organic, UTM, gclid, etc.) arrives later.
+   */
+  function isWeakFirstTouch(data) {
+    if (!data) {
+      return true;
+    }
+    var source = (data.first_touch_source || data.source || '').toLowerCase();
+    var medium = (data.first_touch_medium || data.medium || '').toLowerCase();
+    var channel = (data.first_touch_channel || data.channel || '').toLowerCase();
+    return !source ||
+      source === 'direct' ||
+      medium === 'none' ||
+      medium === '(none)' ||
+      channel === 'direct';
+  }
+
+  function isMarketingTouch(touch) {
+    return !!(touch && touch.source && !isWeakFirstTouch(touch));
+  }
+
+  /**
+   * www↔apex or trailing-slash 301 hops leave an internal document.referrer.
+   * That must not be locked as first-touch "direct" (it often replaced Google).
+   */
+  function isSameSiteRedirectHop(referrer) {
+    var host = getUrlHost(referrer);
+    if (!host || !isInternalHost(host)) {
+      return false;
+    }
+
+    try {
+      var refPath = new URL(referrer).pathname.replace(/\/+$/, '') || '/';
+      var curPath = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+      if (refPath === curPath) {
+        return true;
+      }
+    } catch (e) {
+      // fall through to Performance API check
+    }
+
+    try {
+      var entries = window.performance &&
+        window.performance.getEntriesByType &&
+        window.performance.getEntriesByType('navigation');
+      if (entries && entries[0] && entries[0].redirectCount > 0) {
+        return true;
+      }
+    } catch (e2) {
+      // ignore
+    }
+
+    return false;
+  }
+
+  /**
+   * Fill empty top-level utm_source / utm_medium from an inferred touch
+   * so CRM "UTM / source" views show Google organic even without URL params.
+   * Never overwrites explicit UTM values already present.
+   */
+  function fillUtmFromTouch(data, touch) {
+    if (!data || !touch) {
+      return;
+    }
+    if (!data.utm_source && touch.source && touch.source !== 'direct') {
+      data.utm_source = touch.source;
+    }
+    if (!data.utm_medium && touch.medium && touch.medium !== 'none' && touch.medium !== '(none)') {
+      data.utm_medium = touch.medium;
+    }
+  }
+
+  /**
+   * Backfill first/last-touch from a legacy cookie (utm_* only).
+   * Never overwrites first-touch fields that already exist.
+   */
+  function migrateLegacyCookie(existing) {
+    var data = {};
+    var key;
+    for (key in existing) {
+      if (Object.prototype.hasOwnProperty.call(existing, key)) {
+        data[key] = existing[key];
+      }
+    }
+
+    var resolved = resolveSourceMedium(data, data.referrer || '');
+    var at = data.first_visit_time || getAttributionTimestamp();
+    var touch = {
+      source: resolved.source,
+      medium: resolved.medium,
+      channel: deriveChannel(resolved.source, resolved.medium, data.gclid, data.fbclid),
+      campaign: data.utm_campaign || '',
+      referrer: data.referrer || '',
+      landing_page: data.landing_page || '',
+      at: at
+    };
+
+    if (!hasFirstTouch(data)) {
+      applyFirstTouch(data, touch);
+    }
+    if (!data.last_touch_at) {
+      applyLastTouch(data, {
+        source: data.first_touch_source,
+        medium: data.first_touch_medium,
+        channel: data.first_touch_channel,
+        campaign: data.first_touch_campaign,
+        referrer: data.first_touch_referrer,
+        landing_page: data.first_touch_landing_page,
+        at: data.first_touch_at
+      });
+    }
+    return data;
+  }
+
+  // ============================================================
+  // Capture attribution on page load
+  // ============================================================
+
+  /**
+   * Read UTM / click-ID params from the current URL.
+   * @returns {Object} Key/value map of present attribution params
+   */
+  function getUrlAttributionParams() {
+    var params = new URLSearchParams(window.location.search);
+    var data = {};
+    var hasAny = false;
+
+    for (var i = 0; i < ATTRIBUTION_PARAMS.length; i++) {
+      var key = ATTRIBUTION_PARAMS[i];
+      var val = params.get(key);
+      if (val !== null && val !== '') {
+        data[key] = val;
+        hasAny = true;
+      }
+    }
+    return hasAny ? data : null;
+  }
+
+  /**
+   * Persist first-touch on the first visit (UTM, click-ID, or referrer).
+   * Never overwrite a real first-touch with later direct/internal visits.
+   * Weak "direct" placeholders may upgrade when a marketing signal arrives.
+   * Update last-touch only when new UTM / click-IDs arrive.
+   */
+  function captureAttribution() {
+    var existing = getLeadAttributionCookie();
+    var urlParams = getUrlAttributionParams();
+
+    // No UTM / click-ID in the URL (typical for Google organic).
+    if (!urlParams) {
+      var nowFromReferrer = getAttributionTimestamp();
+      var referrerTouch = buildTouchSnapshot({}, nowFromReferrer);
+      var strongReferrer = isMarketingTouch(referrerTouch);
+
+      if (!existing) {
+        // Same-site redirect hop (www→apex / trailing-slash) looks like an
+        // internal referrer — do not lock that as first-touch "direct".
+        if (!strongReferrer && isSameSiteRedirectHop(document.referrer || '')) {
+          return;
+        }
+
+        var referrerAttribution = {
+          campaign_id: '',
+          utm_source: '',
+          utm_medium: '',
+          utm_campaign: '',
+          utm_content: '',
+          utm_term: '',
+          gclid: '',
+          fbclid: '',
+          landing_page: referrerTouch.landing_page,
+          referrer: referrerTouch.referrer,
+          first_visit_time: nowFromReferrer
+        };
+        fillUtmFromTouch(referrerAttribution, referrerTouch);
+        applyFirstTouch(referrerAttribution, referrerTouch);
+        applyLastTouch(referrerAttribution, referrerTouch);
+        setLeadAttributionCookie(referrerAttribution);
+        return;
+      }
+
+      var updatedFromReferrer = hasFirstTouch(existing)
+        ? existing
+        : migrateLegacyCookie(existing);
+
+      // Upgrade weak direct → Google organic (or other external referrer)
+      if (strongReferrer && isWeakFirstTouch(updatedFromReferrer)) {
+        applyFirstTouch(updatedFromReferrer, referrerTouch);
+        fillUtmFromTouch(updatedFromReferrer, referrerTouch);
+        if (!updatedFromReferrer.referrer) {
+          updatedFromReferrer.referrer = referrerTouch.referrer;
+        }
+        if (!updatedFromReferrer.landing_page) {
+          updatedFromReferrer.landing_page = referrerTouch.landing_page;
+        }
+        setLeadAttributionCookie(updatedFromReferrer);
+        return;
+      }
+
+      if (!hasFirstTouch(existing)) {
+        setLeadAttributionCookie(updatedFromReferrer);
+      }
+      return;
+    }
+
+    var now = getAttributionTimestamp();
+    var touch = buildTouchSnapshot(urlParams, now);
+
+    if (!existing) {
+      var attribution = {
+        campaign_id: urlParams.campaign_id || '',
+        utm_source: urlParams.utm_source || '',
+        utm_medium: urlParams.utm_medium || '',
+        utm_campaign: urlParams.utm_campaign || '',
+        utm_content: urlParams.utm_content || '',
+        utm_term: urlParams.utm_term || '',
+        gclid: urlParams.gclid || '',
+        fbclid: urlParams.fbclid || '',
+        landing_page: touch.landing_page,
+        referrer: touch.referrer,
+        first_visit_time: now
+      };
+      // gclid/fbclid-only landings still get utm_source/medium for CRM
+      fillUtmFromTouch(attribution, touch);
+      applyFirstTouch(attribution, touch);
+      applyLastTouch(attribution, touch);
+      setLeadAttributionCookie(attribution);
+      return;
+    }
+
+    // Cookie exists — preserve real first-touch; upgrade weak direct only
+    var updated = migrateLegacyCookie(existing);
+    if (isWeakFirstTouch(updated)) {
+      applyFirstTouch(updated, touch);
+      fillUtmFromTouch(updated, touch);
+    }
+    if (urlParams.gclid && !updated.gclid) {
+      updated.gclid = urlParams.gclid;
+    }
+    if (urlParams.fbclid && !updated.fbclid) {
+      updated.fbclid = urlParams.fbclid;
+    }
+    // Refresh last-touch + current UTM snapshot when URL has marketing params
+    updated.utm_source = urlParams.utm_source || updated.utm_source || '';
+    updated.utm_medium = urlParams.utm_medium || updated.utm_medium || '';
+    updated.utm_campaign = urlParams.utm_campaign || updated.utm_campaign || '';
+    updated.utm_content = urlParams.utm_content || updated.utm_content || '';
+    updated.utm_term = urlParams.utm_term || updated.utm_term || '';
+    if (urlParams.campaign_id) {
+      updated.campaign_id = urlParams.campaign_id;
+    }
+    applyLastTouch(updated, touch);
+    setLeadAttributionCookie(updated);
+  }
+
+  // ============================================================
+  // Populate hidden form fields before submission
+  // ============================================================
+
+  /**
+   * Fill matching hidden inputs on a form from the attribution cookie.
+   * Only sets fields that already exist in the form markup.
+   * @param {HTMLFormElement} form
+   */
+  function populateFormAttributionFields(form) {
+    var data = getLeadAttributionCookie();
+    if (!data || !form) {
+      return;
+    }
+
+    // Ensure form UTM fields reflect first-touch when URL never had utm_*
+    // (Google organic) so CRM source views are not empty.
+    fillUtmFromTouch(data, {
+      source: data.first_touch_source || data.utm_source || '',
+      medium: data.first_touch_medium || data.utm_medium || ''
+    });
+
+    for (var i = 0; i < FORM_FIELDS.length; i++) {
+      var fieldName = FORM_FIELDS[i];
+      if (typeof data[fieldName] === 'undefined') {
+        continue;
+      }
+      // Prefer name= match; fall back to id= for flexibility
+      var input =
+        form.querySelector('[name="' + fieldName + '"]') ||
+        form.querySelector('#' + fieldName);
+      if (input) {
+        input.value = data[fieldName];
+      }
+    }
+
+    // Map utm_campaign → campaign_name hidden field when present
+    if (data.utm_campaign) {
+      var campaignNameInput =
+        form.querySelector('[name="campaign_name"]') ||
+        form.querySelector('#campaign_name');
+      if (campaignNameInput) {
+        campaignNameInput.value = data.utm_campaign;
+      }
+    }
+  }
+
+  /**
+   * Attach a capture-phase submit listener so attribution is injected
+   * before any other submit handlers (works for every form on the page).
+   */
+  function bindFormAttribution() {
+    document.addEventListener('submit', function (event) {
+      var form = event.target;
+      if (form && form.tagName === 'FORM') {
+        populateFormAttributionFields(form);
+      }
+    }, true);
+  }
+
+  // API field subset used by AJAX lead submission
+  window.getLeadAttributionForApi = function () {
+    var data = getLeadAttributionCookie() || {};
+    fillUtmFromTouch(data, {
+      source: data.first_touch_source || data.utm_source || '',
+      medium: data.first_touch_medium || data.utm_medium || ''
+    });
+
+    var apiKeys = [
+      'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term',
+      'gclid', 'fbclid',
+      'first_touch_source', 'first_touch_medium', 'first_touch_channel',
+      'first_touch_campaign', 'first_touch_referrer', 'first_touch_landing_page', 'first_touch_at',
+      'last_touch_source', 'last_touch_medium', 'last_touch_channel',
+      'last_touch_campaign', 'last_touch_referrer', 'last_touch_landing_page', 'last_touch_at'
+    ];
+    var out = {};
+    for (var i = 0; i < apiKeys.length; i++) {
+      var key = apiKeys[i];
+      if (data[key] !== null && data[key] !== undefined && data[key] !== '') {
+        out[key] = data[key];
+      }
+    }
+    return out;
   };
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', ensureAttribution);
-  } else {
-    ensureAttribution();
-  }
-})(window, document);
+  // ============================================================
+  // Initialize on every page load
+  // ============================================================
+  captureAttribution();
+  bindFormAttribution();
+})();

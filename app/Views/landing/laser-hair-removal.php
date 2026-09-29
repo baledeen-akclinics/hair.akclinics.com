@@ -549,6 +549,28 @@ $addressPhrase = $loc['address_phrase'];
                     <input type="hidden" name="location_slug" value="<?= esc($location_slug, 'attr') ?>">
           <input type="hidden" name="service" value="<?= esc($service, 'attr') ?>">
           <input type="hidden" name="paid_lead" value="yes">
+                    <input type="hidden" name="utm_source" value="">
+                    <input type="hidden" name="utm_medium" value="">
+                    <input type="hidden" name="utm_campaign" value="">
+                    <input type="hidden" name="utm_content" value="">
+                    <input type="hidden" name="utm_term" value="">
+                    <input type="hidden" name="gclid" value="">
+                    <input type="hidden" name="fbclid" value="">
+                    <input type="hidden" name="first_touch_source" value="">
+                    <input type="hidden" name="first_touch_medium" value="">
+                    <input type="hidden" name="first_touch_channel" value="">
+                    <input type="hidden" name="first_touch_campaign" value="">
+                    <input type="hidden" name="first_touch_referrer" value="">
+                    <input type="hidden" name="first_touch_landing_page" value="">
+                    <input type="hidden" name="first_touch_at" value="">
+                    <input type="hidden" name="last_touch_source" value="">
+                    <input type="hidden" name="last_touch_medium" value="">
+                    <input type="hidden" name="last_touch_channel" value="">
+                    <input type="hidden" name="last_touch_campaign" value="">
+                    <input type="hidden" name="last_touch_referrer" value="">
+                    <input type="hidden" name="last_touch_landing_page" value="">
+                    <input type="hidden" name="last_touch_at" value="">
+
           <input type="hidden" name="page_url" value="<?= esc($landing_page) ?>">
 
           <input class="input" placeholder="Enter Name" name="name">
@@ -1396,6 +1418,28 @@ $addressPhrase = $loc['address_phrase'];
                     <input type="hidden" name="location_slug" value="<?= esc($location_slug, 'attr') ?>">
             <input type="hidden" name="service" value="<?= esc($service, 'attr') ?>">
             <input type="hidden" name="paid_lead" value="yes">
+                    <input type="hidden" name="utm_source" value="">
+                    <input type="hidden" name="utm_medium" value="">
+                    <input type="hidden" name="utm_campaign" value="">
+                    <input type="hidden" name="utm_content" value="">
+                    <input type="hidden" name="utm_term" value="">
+                    <input type="hidden" name="gclid" value="">
+                    <input type="hidden" name="fbclid" value="">
+                    <input type="hidden" name="first_touch_source" value="">
+                    <input type="hidden" name="first_touch_medium" value="">
+                    <input type="hidden" name="first_touch_channel" value="">
+                    <input type="hidden" name="first_touch_campaign" value="">
+                    <input type="hidden" name="first_touch_referrer" value="">
+                    <input type="hidden" name="first_touch_landing_page" value="">
+                    <input type="hidden" name="first_touch_at" value="">
+                    <input type="hidden" name="last_touch_source" value="">
+                    <input type="hidden" name="last_touch_medium" value="">
+                    <input type="hidden" name="last_touch_channel" value="">
+                    <input type="hidden" name="last_touch_campaign" value="">
+                    <input type="hidden" name="last_touch_referrer" value="">
+                    <input type="hidden" name="last_touch_landing_page" value="">
+                    <input type="hidden" name="last_touch_at" value="">
+
             <input type="hidden" name="page_url" value="<?= esc($landing_page) ?>">
             <input class="input" id="ccName" placeholder="Full name*" name="name" autocomplete="name" required>
             <input class="input" id="ccPhone" type="number" placeholder="Phone*" name="mobile_no" autocomplete="tel" required>
@@ -1448,6 +1492,9 @@ window.AK_LANDING = {
   locationSlug: <?= json_encode($location_slug) ?>,
 city: <?= json_encode($cityName) ?>
 };
+</script>
+<script>
+window.__LEAD_ATTRIBUTION_SERVER_TIME__ = <?= json_encode(date('c')) ?>;
 </script>
 <script src="<?= esc(base_url('js/landing-tracking.js')) ?>"></script>
 <script src="<?= esc(base_url('js/landing-forms.js')) ?>"></script>
