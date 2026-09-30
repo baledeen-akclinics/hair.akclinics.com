@@ -2,24 +2,22 @@
 
 namespace App\Services;
 
-use Config\CampaignApi;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Debug;
 
 /**
  * Submits campaign leads to the public Campaign Leads API.
  * Assignment is handled by the API (clinic mapping + round-robin).
+ *
+ * Configured via .env:
+ *   API_BASE_URL
+ *   CRM_AUTH_KEY
+ *   API_CAMPAIGN_LEADS_PATH (optional, default /campaign-leads)
+ *   API_TIMEOUT (optional, default 20)
+ *   API_DEFAULT_MOBILE_COUNTRY_CODE (optional, default 91)
  */
 class CampaignLeadService
 {
-    protected CampaignApi $config;
-
-    public function __construct(?CampaignApi $config = null)
-    {
-        $this->config = $config ?? config('CampaignApi');
-    }
-
     /**
      * POST a lead payload to the Campaign Leads API.
      *
@@ -28,11 +26,12 @@ class CampaignLeadService
      */
     public function submit(array $payload): array
     {
-        $url = rtrim($this->config->baseURL, '/') . '/' . ltrim($this->config->campaignLeadsPath, '/');
-        // print_r($url);
-        // die();
+        $baseUrl = rtrim((string) env('API_BASE_URL', ''), '/');
+        $path    = (string) env('API_CAMPAIGN_LEADS_PATH', '/campaign-leads');
+        $url     = $baseUrl . '/' . ltrim($path, '/');
+
         $client = service('curlrequest', [
-            'timeout'     => $this->config->timeout,
+            'timeout'     => (int) env('API_TIMEOUT', 20),
             'http_errors' => false,
         ]);
 
@@ -41,7 +40,7 @@ class CampaignLeadService
                 'headers' => [
                     'Accept'       => 'application/json',
                     'Content-Type' => 'application/json',
-                    'Auth-Key'     => env('CRM_AUTH_KEY'),
+                    'Auth-Key'     => (string) env('CRM_AUTH_KEY', ''),
                 ],
                 'json' => $payload,
             ]);
@@ -81,7 +80,7 @@ class CampaignLeadService
         $payload = [
             'name'                => $name,
             'mobile'              => $mobile,
-            'mobile_country_code' => (string) ($form['mobile_country_code'] ?? $this->config->defaultMobileCountryCode),
+            'mobile_country_code' => (string) ($form['mobile_country_code'] ?? env('API_DEFAULT_MOBILE_COUNTRY_CODE', '91')),
             'source_id'           => (string) ($context['source_id'] ?? 'landing-form'),
             'source_url'          => (string) ($context['source_url'] ?? current_url()),
         ];
@@ -113,7 +112,7 @@ class CampaignLeadService
         }
 
         if (! empty($form['norwood_stage'])) {
-            $desc = $payload['description'] ?? '';
+            $desc  = $payload['description'] ?? '';
             $extra = 'Norwood stage: ' . $form['norwood_stage'];
             $payload['description'] = $desc !== '' ? ($desc . ' | ' . $extra) : $extra;
         }
@@ -155,10 +154,10 @@ class CampaignLeadService
     protected function normalizeCity(string $city): string
     {
         $map = [
-            'delhi'      => 'Delhi',
-            'bangalore'  => 'Bangalore',
-            'bengaluru'  => 'Bangalore',
-            'ludhiana'   => 'Ludhiana',
+            'delhi'     => 'Delhi',
+            'bangalore' => 'Bangalore',
+            'bengaluru' => 'Bangalore',
+            'ludhiana'  => 'Ludhiana',
         ];
 
         $key = strtolower(trim($city));
