@@ -108,7 +108,7 @@ class Landing extends BaseConfig
             'wa_campaign_suffix'    => 'HT',
             'wa_message'            => "Hi, I'm looking for a hair transplant in {city}. Can I get more information?",
             'procedure_category_id' => 4, // Hair Transplant (GET /procedure-categories)
-            'css_version'           => '1',
+            'css_version'           => '2',
             'hero_preload'          => 'image/hair-transplant-results.webp',
         ],
         'hair-transplant-cost' => [
@@ -120,7 +120,7 @@ class Landing extends BaseConfig
             'wa_campaign_suffix'    => 'HT',
             'wa_message'            => "Hi, I'm looking for hair transplant cost in {city}. Can I get more information?",
             'procedure_category_id' => 4, // Hair Transplant
-            'css_version'           => '1',
+            'css_version'           => '2',
             'hero_preload'          => 'image/hair-transplant-results.webp',
         ],
         'hair-treatments' => [
@@ -132,7 +132,7 @@ class Landing extends BaseConfig
             'wa_campaign_suffix'    => 'HL',
             'wa_message'            => "Hi, I'm looking for hair loss treatment in {city}. Can I get more information?",
             'procedure_category_id' => 5, // Hair Loss Treatments
-            'css_version'           => '1',
+            'css_version'           => '2',
             'hero_preload'          => null,
         ],
         'laser-hair-removal' => [
@@ -144,7 +144,7 @@ class Landing extends BaseConfig
             'wa_campaign_suffix'    => 'LHR',
             'wa_message'            => "Hi, I'm looking for laser hair removal in {city}. Can I get more information?",
             'procedure_category_id' => 3, // Laser Hair Removal
-            'css_version'           => '2',
+            'css_version'           => '3',
             'hero_preload'          => null,
         ],
     ];
@@ -168,6 +168,17 @@ class Landing extends BaseConfig
         'laser-hair-removal.delhi'        => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
         'laser-hair-removal.bangalore'    => ['phone' => '7888835026', 'phone_display' => '7888835026'],
         'laser-hair-removal.ludhiana'     => ['phone' => '7888835026', 'phone_display' => '7888835026'],
+    ];
+
+    /**
+     * Per-page WhatsApp link overrides (replaces the generated wa.me URL).
+     * Key: "{pageType}.{location}"
+     *
+     * @var array<string, string>
+     */
+    public array $waUrlOverrides = [
+        'hair-transplant.delhi'     => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant.bangalore' => 'https://wa.akclinics.com/AKC1285',
     ];
 
     /**

@@ -61,7 +61,8 @@ class LandingContext
 
         $waMessage = str_replace('{city}', $loc['name'], $page['wa_message']);
         $waCampaign = $loc['name'] . '_' . $page['wa_campaign_suffix'];
-        $waUrl = 'https://wa.me/' . $loc['whatsapp']
+        $waUrl = $this->config->waUrlOverrides[$key]
+            ?? 'https://wa.me/' . $loc['whatsapp']
             . '?text=' . rawurlencode($waMessage)
             . '&utm_source=google&utm_medium=cpc&utm_campaign=' . rawurlencode($waCampaign);
 
