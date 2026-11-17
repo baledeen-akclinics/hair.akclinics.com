@@ -30,6 +30,8 @@ class Landing extends BaseConfig
         'hair-transplant-cost',
         'hair-treatments',
         'laser-hair-removal',
+        'candidacy',
+        'outstation',
     ];
 
     /**
@@ -54,39 +56,61 @@ class Landing extends BaseConfig
             'name'            => 'Delhi',
             'display_name'    => 'Delhi',
             'possessive'      => "Delhi's",
-            'phone'           => '6239957752',
-            'phone_display'   => '+91-6239957752',
+            'phone'           => '7087046120',
+            'phone_display'   => '+91-7087046120',
             'address_short'   => 'Greater Kailash (GK-1)',
             'address_phrase'  => 'Located in Greater Kailash (GK-1), our Delhi',
             'surgeries'       => '5,000+',
             'whatsapp'        => '919779028861',
             'topbar_city'     => 'Delhi',
+            // Used only by the 'outstation' page type. PROPOSED list, not confirmed
+            // against actual targeting data — marketing to verify before launch.
+            'outstation_area_label' => 'NCR & Nearby',
+            'outstation_districts'  => [
+                'Gurugram', 'Noida', 'Ghaziabad', 'Faridabad', 'Meerut', 'Panipat',
+                'Sonipat', 'Rohtak', 'Karnal', 'Agra', 'Aligarh', 'Moradabad', 'Hisar', 'Jaipur',
+            ],
         ],
         'bangalore' => [
             'slug'            => 'bangalore',
             'name'            => 'Bangalore',
             'display_name'    => 'Bangalore',
             'possessive'      => "Bangalore's",
-            'phone'           => '08146442207',
-            'phone_display'   => '081464-42207',
+            'phone'           => '7087001629',
+            'phone_display'   => '7087001629',
             'address_short'   => 'Indiranagar',
             'address_phrase'  => 'Located in Indiranagar, our Bengaluru',
             'surgeries'       => '10,000+',
             'whatsapp'        => '919779028861',
             'topbar_city'     => 'Bengaluru',
+            // Used only by the 'outstation' page type. PROPOSED list, not confirmed
+            // against actual targeting data — marketing to verify before launch.
+            'outstation_area_label' => 'Bangalore',
+            'outstation_districts'  => [
+                'Electronic City', 'Whitefield', 'Koramangala', 'HSR Layout', 'Marathahalli',
+                'Sarjapur Road', 'Jayanagar', 'JP Nagar', 'Bannerghatta Road', 'Yelahanka',
+                'Hebbal', 'BTM Layout',
+            ],
         ],
         'ludhiana' => [
             'slug'            => 'ludhiana',
             'name'            => 'Ludhiana',
             'display_name'    => 'Ludhiana',
             'possessive'      => "Ludhiana's",
-            'phone'           => '07888835026',
-            'phone_display'   => '07888835026',
+            'phone'           => '7087045805',
+            'phone_display'   => '7087045805',
             'address_short'   => 'Sharabha Nagar & South City',
             'address_phrase'  => 'Located in Sharabha Nagar & South City, our Ludhiana',
             'surgeries'       => '5,000+',
             'whatsapp'        => '919779028861',
             'topbar_city'     => 'Ludhiana',
+            // Used only by the 'outstation' page type.
+            'outstation_area_label' => 'Punjab',
+            'outstation_districts'  => [
+                'Jalandhar', 'Amritsar', 'Patiala', 'Moga', 'Bathinda', 'Hoshiarpur',
+                'Phagwara', 'Kapurthala', 'Sangrur', 'Barnala', 'Gurdaspur', 'Ferozepur',
+                'Malerkotla', 'Chandigarh',
+            ],
         ],
     ];
 
@@ -147,6 +171,36 @@ class Landing extends BaseConfig
             'css_version'           => '3',
             'hero_preload'          => null,
         ],
+        'candidacy' => [
+            'slug'                  => 'candidacy',
+            // Reuses hair-transplant's physical assets (images, doctor photos, css/js)
+            // instead of duplicating ~14MB of binary files for a nearly-identical layout.
+            'asset_path'            => 'hair-transplant',
+            'service'               => 'Hair transplant',
+            'form_name_hero'        => 'Hair Assessment',
+            'form_name_calc'        => 'Cost Calculator',
+            'source_id_prefix'      => 'landing-candidacy',
+            'wa_campaign_suffix'    => 'HTC',
+            'wa_message'            => "Hi, I'd like a doctor assessment to check if I'm a candidate for a hair transplant in {city}.",
+            'procedure_category_id' => 4, // Hair Transplant
+            'css_version'           => '2',
+            'hero_preload'          => 'image/hair-transplant-results.webp',
+        ],
+        'outstation' => [
+            'slug'                  => 'outstation',
+            // Reuses hair-transplant's physical assets (images, doctor photos, css/js)
+            // instead of duplicating ~14MB of binary files for a nearly-identical layout.
+            'asset_path'            => 'hair-transplant',
+            'service'               => 'Hair transplant',
+            'form_name_hero'        => 'Virtual Assessment',
+            'form_name_calc'        => 'Cost Calculator',
+            'source_id_prefix'      => 'landing-outstation',
+            'wa_campaign_suffix'    => 'HTO',
+            'wa_message'            => "Hi, I'm travelling from outside {city} for a hair transplant. Can I start with a virtual consultation?",
+            'procedure_category_id' => 4, // Hair Transplant
+            'css_version'           => '2',
+            'hero_preload'          => 'image/hair-transplant-results.webp',
+        ],
     ];
 
     /**
@@ -156,18 +210,26 @@ class Landing extends BaseConfig
      * @var array<string, array{phone?: string, phone_display?: string}>
      */
     public array $phoneOverrides = [
-        'hair-transplant.delhi'           => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant.bangalore'       => ['phone' => '08146442207', 'phone_display' => '081464-42207'],
-        'hair-transplant.ludhiana'        => ['phone' => '07888835026', 'phone_display' => '07888835026'],
-        'hair-transplant-cost.delhi'      => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant-cost.bangalore'  => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant-cost.ludhiana'   => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'hair-treatments.delhi'           => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
+        // 2026-11-17: all overrides updated to the new numbers given for Ludhiana/Delhi/Bangalore,
+        // applied uniformly across every existing page type (not just the new ad-group pages).
+        'hair-transplant.delhi'           => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
+        'hair-transplant.bangalore'       => ['phone' => '7087001629', 'phone_display' => '7087001629'],
+        'hair-transplant.ludhiana'        => ['phone' => '7087045805', 'phone_display' => '7087045805'],
+        'hair-transplant-cost.delhi'      => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
+        'hair-transplant-cost.bangalore'  => ['phone' => '7087001629', 'phone_display' => '7087001629'],
+        'hair-transplant-cost.ludhiana'   => ['phone' => '7087045805', 'phone_display' => '7087045805'],
+        'hair-treatments.delhi'           => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
         'hair-treatments.bangalore'       => ['phone' => '7087001629', 'phone_display' => '7087001629'],
-        'hair-treatments.ludhiana'        => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'laser-hair-removal.delhi'        => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'laser-hair-removal.bangalore'    => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'laser-hair-removal.ludhiana'     => ['phone' => '7888835026', 'phone_display' => '7888835026'],
+        'hair-treatments.ludhiana'        => ['phone' => '7087045805', 'phone_display' => '7087045805'],
+        'laser-hair-removal.delhi'        => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
+        'laser-hair-removal.bangalore'    => ['phone' => '7087001629', 'phone_display' => '7087001629'],
+        'laser-hair-removal.ludhiana'     => ['phone' => '7087045805', 'phone_display' => '7087045805'],
+        'candidacy.delhi'                 => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
+        'candidacy.bangalore'             => ['phone' => '7087001629', 'phone_display' => '7087001629'],
+        'candidacy.ludhiana'              => ['phone' => '7087045805', 'phone_display' => '7087045805'],
+        'outstation.delhi'                => ['phone' => '7087046120', 'phone_display' => '+91-7087046120'],
+        'outstation.bangalore'            => ['phone' => '7087001629', 'phone_display' => '7087001629'],
+        'outstation.ludhiana'             => ['phone' => '7087045805', 'phone_display' => '7087045805'],
     ];
 
     /**
@@ -270,6 +332,36 @@ class Landing extends BaseConfig
             'description' => 'Get smooth, hair-free skin with full body laser hair removal in Ludhiana. Pain-reduced, safe for all skin types. Book your free consultation today!',
             'canonical'   => 'https://hair.akclinics.com/landing/laser-hair-removal/ludhiana/',
         ],
+        'candidacy.delhi' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Delhi',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Delhi — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/candidacy/delhi/',
+        ],
+        'candidacy.bangalore' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Bangalore',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Bangalore — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/candidacy/bangalore/',
+        ],
+        'candidacy.ludhiana' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Ludhiana',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Ludhiana — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/candidacy/ludhiana/',
+        ],
+        'outstation.delhi' => [
+            'title'       => 'Hair Transplant for NCR & Outstation Patients | AK Clinics Delhi',
+            'description' => 'Travelling from Gurugram, Noida, Ghaziabad, Faridabad or elsewhere near NCR? Start with a virtual consultation at AK Clinics Delhi before you travel.',
+            'canonical'   => 'https://hair.akclinics.com/landing/outstation/delhi/',
+        ],
+        'outstation.bangalore' => [
+            'title'       => 'Hair Transplant Clinic Near You in Bangalore | AK Clinics',
+            'description' => 'Travelling from Electronic City, Whitefield, Koramangala or elsewhere in Bangalore? Start with a virtual consultation at AK Clinics Indiranagar before you visit.',
+            'canonical'   => 'https://hair.akclinics.com/landing/outstation/bangalore/',
+        ],
+        'outstation.ludhiana' => [
+            'title'       => 'Hair Transplant for Punjab Outstation Patients | AK Clinics Ludhiana',
+            'description' => 'Travelling from Jalandhar, Amritsar, Patiala, Bathinda or elsewhere in Punjab? Start with a virtual consultation at AK Clinics Ludhiana before you travel.',
+            'canonical'   => 'https://hair.akclinics.com/landing/outstation/ludhiana/',
+        ],
     ];
 
     /**
@@ -289,5 +381,7 @@ class Landing extends BaseConfig
         'hair-transplant-cost' => 4,
         'hair-treatments'      => 5,
         'laser-hair-removal'   => 3,
+        'candidacy'            => 4,
+        'outstation'           => 4,
     ];
 }

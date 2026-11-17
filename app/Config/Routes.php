@@ -4,7 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
-$pageTypes = 'hair-transplant|hair-transplant-cost|hair-treatments|laser-hair-removal';
+$pageTypes = 'hair-transplant|hair-transplant-cost|hair-treatments|laser-hair-removal|candidacy|outstation';
 $locations = 'delhi|bangalore|ludhiana';
 /*
  * Primary landing URLs:

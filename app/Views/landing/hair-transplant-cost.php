@@ -147,7 +147,7 @@ function gtag_report_conversion(url) {
     <div class="topbar">
         <div class="container">
             <div>#1 Hair Transplant Clinic in <?= esc($topbarCity) ?></div>
-            <div><a href="tel:<?= esc($phone, 'attr') ?>">Call: <?= esc($phoneDisplay) ?></a></div>
+            <div><a href="tel:<?= esc($phone, 'attr') ?>" onclick="return gtag_report_conversion();">Call: <?= esc($phoneDisplay) ?></a></div>
         </div>
     </div>
 
@@ -161,7 +161,7 @@ function gtag_report_conversion(url) {
                 <a href="#results">Results</a><a href="#treatments">Treatments</a><a href="#doctors">Doctors</a><a
                     href="#testimonials">Testimonials</a><a href="#reviews">Reviews</a><a href="#faq">FAQ</a>
             </nav>
-            <a class="cta-btn" href="#assessment">Free Assessment</a>
+            <a class="cta-btn" href="javascript:void(0)" onclick="document.getElementById('openCalc').click()">Get My Cost Estimate</a>
             <button id="hamb" class="hamburger"><span></span></button>
         </div>
         <nav id="mnav" class="mnav">
@@ -171,27 +171,27 @@ function gtag_report_conversion(url) {
             <a href="#testimonials" onclick="toggleMenu(false)">Testimonials</a>
             <a href="#reviews" onclick="toggleMenu(false)">Reviews</a>
             <a href="#faq" onclick="toggleMenu(false)">FAQ</a>
-            <a href="#assessment" onclick="toggleMenu(false)" style="color:#fd7e14;font-weight:800">Free Assessment</a>
+            <a href="javascript:void(0)" onclick="toggleMenu(false); document.getElementById('openCalc').click()" style="color:#fd7e14;font-weight:800">Get My Cost Estimate</a>
         </nav>
     </header>
     <!-- HERO -->
     <section class="hero">
         <div class="container hero-wrap">
             <div>
-                <h1>Hair Transplant Cost in <?= esc($cityName) ?><br>Get a Quick Price Estimate</h1>
-                <p>Transparent pricing. No surprises. Advanced Bio-FUE by India’s Top Hair Transplant Surgeons.</p>
+                <h1>Hair Transplant Cost in <?= esc($cityName) ?></h1>
+                <p>Transparent pricing, no surprises — know your estimated procedure cost upfront, with 0% Easy EMI options, before you even book your assessment.</p>
                 <ul class="hero-list">
+                    <li>Transparent pricing &amp; 0% Easy EMI</li>
                     <li>American Board Certified Doctors</li>
                     <li>Founders of Bio-FUE™</li>
                     <li><?= esc($surgeries) ?> Successful Surgeries</li>
                     <li>20+ Years of Expertise You Can Rely On</li>
-                    <li>Get Hair Transparent @ 0% Easy EMI</li>
 
 
                 </ul>
             </div>
             <aside class="form-card" id="assessment">
-                <h2>Know your Hair Transplant Cost!</h2>
+                <h3>Get Your Hair Assessment Now!</h3>
                 <form id="lead_otp" style="display:grid;gap:12px">
                     <input type="hidden" name="lp_url" value="<?= esc(base_url()) ?>" />
 <input type="hidden" name="lead_source" value="<?= esc($campaign_id ?? $source_id, 'attr') ?>">
@@ -241,9 +241,8 @@ function gtag_report_conversion(url) {
 
                     <button type="submit" class="btn-primary">Submit Now<i class="fas fa-arrow-right"></i></button>
                 </form>
-                <div id="sendlead-show" style="display:none;">Thank you! Your lead is submitted.</div>
-               <div class="form-note" style="text-align: center;">T&C apply - affordable Hair Transplant in <?= esc($cityName) ?>.</div>
-
+                <!-- <div id="sendlead-show" style="display:none;">Thank you! Your lead is submitted.</div>
+                <div class="form-note">Get a free hair assessment reports. T&C apply.</div> -->
             </aside>
         </div>
         <div class="ticker">
@@ -259,6 +258,28 @@ function gtag_report_conversion(url) {
         </div>
     </section>
 
+    <!-- PRICING BLOCK (compliant disclosure only — no per-graft numbers) -->
+    <section class="section" id="pricing" style="padding:28px 0;background:#f8f9fb">
+        <div class="container" style="max-width:820px;text-align:center">
+            <h2 class="section-title" style="margin-bottom:10px">Hair Transplant Cost in <?= esc($cityName) ?></h2>
+            <p class="lead" style="margin-bottom:4px">Hair transplant procedures start from <strong>₹60,000 onwards</strong>.</p>
+            <p class="lead" style="color:var(--muted)">Your exact cost depends on the number of grafts and your treatment plan — confirmed only after your consultation. 0% Easy EMI available.</p>
+        </div>
+    </section>
+
+    <!-- STATS STRIP (verified figures only) -->
+    <section class="section" id="stats" style="padding:28px 0">
+        <div class="container">
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;text-align:center">
+                <div><div style="font-size:28px;font-weight:800;color:var(--brand)">20+</div><div style="color:var(--muted);font-size:14px">Years of Experience</div></div>
+                <div><div style="font-size:28px;font-weight:800;color:var(--brand)"><?= esc($surgeries) ?></div><div style="color:var(--muted);font-size:14px">Procedures Performed</div></div>
+                <div><div style="font-size:28px;font-weight:800;color:var(--brand)">95%</div><div style="color:var(--muted);font-size:14px">Success Rate</div></div>
+                <div><div style="font-size:28px;font-weight:800;color:var(--brand)">99%</div><div style="color:var(--muted);font-size:14px">No-Swelling Rate</div></div>
+            </div>
+        </div>
+    </section>
+    <style>@media (max-width:720px){#stats .container>div{grid-template-columns:repeat(2,1fr)!important}}</style>
+
     <!-- Tabs / RESULTS -->
     <section class="section" id="results">
         <div class="container">
@@ -270,7 +291,6 @@ function gtag_report_conversion(url) {
             <div class="tabbar">
                 <button class="pill active" data-tab="tab-r">Results</button>
                 <button class="pill" data-tab="tab-w">About AK Clinics</button>
-                <button class="pill" data-tab="tab-c">Hair Transplant cost in <?= esc($cityName) ?></button>
                 <button class="pill" data-tab="tab-t">Why Choose Us</button>
             </div>
 
@@ -483,11 +503,11 @@ function gtag_report_conversion(url) {
             <!-- WHY Choose -->
             <div id="tab-w" class="tabp" style="display:none">
                 <div class="grid-2">
-                    <img src="<?= esc($asset_base) ?>image/delhi-clinic.webp"
+                    <img src="<?= esc($asset_base) ?>image/why-ak-clinics.webp"
                         alt="Explainer">
 
                     <div>
-                        <h2 style="margin:0 0 10px">#1 Hair Transplant Clinic In <?= esc($cityName) ?></h3>
+                        <h2 style="margin:0 0 10px">Best Hair Transplant Clinic in <?= esc($cityName) ?></h3>
                             <p style="margin:0 0 10px; color:#667085;">Choosing the right clinic is key to achieving
                                 long-term, natural-looking results. At AK Clinics, <?= esc($cityName) ?>, every hair transplant is
                                 performed by qualified doctors ensuring unmatched safety, precision, and aesthetics.</p>
@@ -499,54 +519,6 @@ function gtag_report_conversion(url) {
                     </div>
                 </div>
             </div>
-               <!-- WHY Choose -->
-            <div id="tab-c" class="tabp" style="display:none">
-                <div class="grid-2">
-                    <img src="<?= esc($asset_base) ?>image/delhi-clinic.webp"
-                        alt="Explainer">
-
-                    <div>
-                        <h2 style="margin:0 0 10px">How Much Does a Hair Transplant Cost in <?= esc($cityName) ?>?</h2>
-                            <p style="margin:0 0 10px; color:#667085;">Hair transplant cost in <?= esc($cityName) ?> typically starts from Rs.50,000 to 60,000 and varies depending on your baldness grade, graft requirement, and the technique used. The exact cost can only be determined after a detailed assessment of your scalp and donor area.</p>
-                            
-                            <h3 style="margin:0 0 10px">How We Evaluate Your Cost at AK Clinics</h3>
-                            <ul class="ul-check">
-                                <li>Understanding Your Expectations (hairline design, density, coverage area)</li>
-                                <li>Total Grafts Required</li>
-                                <li>Technique Recommended (Bio-FUE, DHT, Beard-to-Scalp, etc.)</li>
-                                <li>Complexity of the Case (repair, weak donor, scarring alopecia)</li>
-                                <li>Surgeon’s Involvement & Expertise</li>
-                            </ul>
-                            
-                    </div>
-                </div>
-            </div>
-            <!-- WHY Choose -->
-            <div id="tab-w" class="tabp" style="display:none">
-                <div class="grid-2"><img
-                        src="<?= esc($asset_base) ?>image/why-ak-clinics.webp"
-                        alt="Why choose AK Clinics" loading="lazy"
-                        style="display:block;width:100%;border-radius:14px;overflow:hidden" />
-                    <div>
-                        <h2 style="margin:0 0 10px">Why choose AK Clinics?</h3>
-                            <p style="margin:0 0 10px; color:#667085;">
-                                At AK Clinics we recommend what is best for the patient. So we proudly acclaim that
-                                wherever you plan hair transplant in <?= esc($cityName) ?> but you must take advice from us as it does
-                                not cost anything. We also strive to provide great aesthetic results through our
-                                experienced surgeon at affordable cost.
-
-                            </p>
-                            <ul class="ul-check">
-                                <li>India's Leading Hair Transplant Clinics</li>
-                                <li>Doctor-led procedures performed only by qualified surgeons</li>
-                                <li>20+ years of experience, <?= esc($surgeries) ?> successful surgeries, and 5 million+ grafts
-                                    transplanted</li>
-                                <li>Advanced Bio-FUE technique ensuring faster recovery and higher graft survival.</li>
-                                <li>Trusted by Celebrities & Recommended by Patients across India and abroad.</li>
-                                <li>Transparent pricing with 0% finance options — no hidden costs.</li>
-                            </ul>
-                    </div>
-                </div>
             </div>
 
             <!-- WHY Choose -->
@@ -579,11 +551,25 @@ function gtag_report_conversion(url) {
         </div>
     </section>
 
+    <!-- PROCESS / JOURNEY -->
+    <section class="section" id="process" style="background:#f8f9fb">
+        <div class="container">
+            <div class="section-head"><h2 class="section-title">Your Hair Transplant Journey</h2></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:18px">
+                <div class="d-card" style="padding:18px"><div style="color:var(--brand);font-weight:800;font-size:13px;margin-bottom:6px">STEP 1</div><strong>Transparent Cost Discussion</strong><p style="color:var(--muted);font-size:14px;margin-top:6px">Your graft requirement is assessed first, so your cost estimate is based on your case, not a guess.</p></div>
+                <div class="d-card" style="padding:18px"><div style="color:var(--brand);font-weight:800;font-size:13px;margin-bottom:6px">STEP 2</div><strong>Personalised Treatment Plan</strong><p style="color:var(--muted);font-size:14px;margin-top:6px">A Bio-FUE plan built around your graft requirement, with 0% EMI options explained upfront.</p></div>
+                <div class="d-card" style="padding:18px"><div style="color:var(--brand);font-weight:800;font-size:13px;margin-bottom:6px">STEP 3</div><strong>Procedure Day</strong><p style="color:var(--muted);font-size:14px;margin-top:6px">Performed by the doctor-led surgical team at AK Clinics, <?= esc($cityName) ?>.</p></div>
+                <div class="d-card" style="padding:18px"><div style="color:var(--brand);font-weight:800;font-size:13px;margin-bottom:6px">STEP 4</div><strong>Structured Aftercare</strong><p style="color:var(--muted);font-size:14px;margin-top:6px">Progress tracked at Week 1, Month 1, 3, 6 and 9–12 — not left to guesswork.</p></div>
+            </div>
+        </div>
+    </section>
+    <style>@media (max-width:900px){#process .container>div{grid-template-columns:1fr 1fr!important}}@media (max-width:560px){#process .container>div{grid-template-columns:1fr!important}}</style>
+
     <!-- TREATMENTS -->
     <section class="section" id="treatments">
         <div class="container">
             <div class="section-head">
-                <h2 class="section-title">Advanced Hair Transplant Options in <?= esc($cityName) ?> at AK Clinics</h2>
+                <h2 class="section-title">Hair Restoration Treatment at AK Clinics, <?= esc($cityName) ?></h2>
             </div>
             <p class="lead">Doctor-led techniques designed to restore natural hair and confidence.</p>
 
@@ -728,7 +714,7 @@ function gtag_report_conversion(url) {
 
                     <div class="t-body">
                       <h3>Female Hair Transplant</h3>
-                      <p>Restore natural density in thinning or widening areas commonly seen in women.</p>
+                      <p>Restores density in thinning areas with the Bio-FUE technique, planned around women's natural hair pattern and growth direction.</p>
                       <strong>Benefits</strong>
                       <ul>
                         <li>Revives thinning areas</li>
@@ -757,7 +743,7 @@ function gtag_report_conversion(url) {
     <section class="section" id="doctors">
         <div class="container">
             <div class="section-head">
-                <h2 class="section-title">Meet the Experts Behind Your Hair Transplant in <?= esc($cityName) ?></h2>
+                <h2 class="section-title">Best Hair Transplant Surgeon in <?= esc($cityName) ?></h2>
             </div>
                 <div class="swiper" id="docSwiper">
                   <div class="swiper-wrapper">
@@ -826,9 +812,6 @@ function gtag_report_conversion(url) {
                         </div>
                       </div>
                     </div>
-
-                    <!-- Dr. Bhawna -->
-                    <!--<div class="swiper-slide"> <div class="d-card"> <div class="d-media"><img loading="lazy" src="<?= esc($asset_base) ?>image/dr-bhawna.webp" alt="Dr. Bhawna Bhardwaj"></div> <div class="d-body"> <h3 style="margin:0 0 6px">Dr. Bhawana Bhardwaj</h3> <strong>Dermatologist & Hair Transplant Surgeon</strong> <ul> <li>MBBS, DVDL (Skin & VD)</li> <li>Member of IADVL and AHRS India</li> <li>Hair Restoration Expert</li> </ul> </div> </div> </div>-->
 
                     <!-- Dr. Suhail -->
                     <div class="swiper-slide">
@@ -1147,212 +1130,123 @@ function gtag_report_conversion(url) {
     </section>
 
     <!-- FAQ -->
-   
-   <section class="section" id="faq">
-    <div class="container">
-        <h2 class="section-title" style="text-align:center;margin:0 0 6px">General Cost & Treatment FAQs</h2>
-        <div class="faq-wrap" style="margin-top:14px">
+    <section class="section" id="faq">
+        <div class="container">
+            <h2 class="section-title" style="text-align:center;margin:0 0 6px">Frequently Asked Questions (FAQ)</h2>
+            <div class="faq-wrap" style="margin-top:14px">
 
-            <!-- FAQ 1 -->
-            <div class="faq-item">
-                <div class="faq-q">How much does a hair transplant cost in <?= esc($cityName) ?> at AK Clinics?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">How much does Hair Transplant cost in <?= esc($cityName) ?> at AK Clinics?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">The cost of a hair transplant at AK Clinics, <?= esc($cityName) ?>, starts from Rs. 60,000 onwards and
+                        depends on grafts, technique (Bio-FUE), and surgeon expertise. You’ll get a precise estimate
+                        after your assessment.</div>
                 </div>
-                <div class="faq-a">
-                    Hair transplant cost in <?= esc($cityName) ?> at AK Clinics usually starts from <strong>Rs. 50,000 to Rs. 60,000</strong>. 
-                    The final cost depends on your graft requirement, baldness grade, and the technique recommended. 
-                    A quick scalp assessment helps us share an accurate estimate.
-                </div>
-            </div>
 
-            <!-- FAQ 2 -->
-            <div class="faq-item">
-                <div class="faq-q">Who performs the hair transplant surgery at AK Clinics <?= esc($cityName) ?>?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Do you offer EMI or 0% finance options?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">Yes, we offer 0% EMI and flexible finance options to make your treatment more
+                        affordable without compromising quality.</div>
                 </div>
-                <div class="faq-a">
-                    All procedures are performed by highly experienced surgeons. 
-                    At our <?= esc($cityName) ?> centre, <strong>Dr. Kapil Dua</strong> and <strong>Dr. Bhawana Bhardwaj</strong> 
-                    lead the treatments to ensure safe and natural-looking results.
-                </div>
-            </div>
 
-            <!-- FAQ 3 -->
-            <div class="faq-item">
-                <div class="faq-q">Is a hair transplant painful?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Are hair transplant results permanent?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">Yes. Transplanted grafts are taken from the permanent donor area, ensuring
+                        lifelong growth and natural appearance with proper care.</div>
                 </div>
-                <div class="faq-a">
-                    The treatment is done under local anesthesia, so you remain comfortable throughout. 
-                    You may feel slight tightness or tenderness for a day or two, which settles easily with medication.
-                </div>
-            </div>
 
-            <!-- FAQ 4 -->
-            <div class="faq-item">
-                <div class="faq-q">When will I see visible results after the transplant?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">What makes AK Clinics different from other clinics in <?= esc($cityName) ?>?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">All transplants are doctor-led, using advanced Bio-FUE for faster healing and
+                        natural density. AK Clinics is celebrity-trusted, maintains a 95%+ success rate, and follows
+                        international hygiene standards.</div>
                 </div>
-                <div class="faq-a">
-                    New hair growth usually begins around <strong>3 to 4 months</strong>. 
-                    Noticeable improvement becomes visible from the <strong>5th month</strong>,
-                    and full results typically appear between <strong>10 to 12 months</strong>.
-                </div>
-            </div>
 
-            <!-- FAQ 5 -->
-            <div class="faq-item">
-                <div class="faq-q">What makes AK Clinics different from other clinics in <?= esc($cityName) ?>?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Who performs the hair transplant surgery at AK Clinics <?= esc($cityName) ?>?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">All procedures are performed exclusively by experienced, qualified doctors at our <?= esc($cityName) ?>
+                        center, under the surgical protocols founded by Dr. Kapil Dua and Dr. Aman Dua, to ensure
+                        safety and natural-looking results.</div>
                 </div>
-                <div class="faq-a">
-                    Our procedures are surgeon-led, we use advanced Bio-FUE technology, 
-                    maintain high graft survival, follow transparent pricing, 
-                    and have over <?= esc($surgeries) ?> successful transplants supported by strong patient trust.
-                </div>
-            </div>
 
-            <!-- FAQ 6 -->
-            <div class="faq-item">
-                <div class="faq-q">Are hair transplant results permanent?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Is a hair transplant painful?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">The procedure is done under local anesthesia, ensuring comfort throughout. Some
+                        mild tenderness may occur for 1–2 days and is easily managed with medication.</div>
                 </div>
-                <div class="faq-a">
-                    Yes. The transplanted hair is taken from the permanent donor zone, 
-                    meaning the results typically last a lifetime with proper care.
-                </div>
-            </div>
 
-            <!-- FAQ 7 -->
-            <div class="faq-item">
-                <div class="faq-q">Do you offer EMI or 0% finance options?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">When will I see visible results after the transplant?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">You’ll start seeing new hair growth in 3–4 months, with fuller density visible by
+                        8–10 months. Final results appear around 12 months post-surgery.</div>
                 </div>
-                <div class="faq-a">
-                    Yes, we offer <strong>0% EMI</strong> and flexible finance plans to make the treatment more affordable.
-                </div>
-            </div>
 
-            <!-- FAQ 8 -->
-            <div class="faq-item">
-                <div class="faq-q">Can patients from outside <?= esc($cityName) ?> book a consultation?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Can patients from outside <?= esc($cityName) ?> book a consultation?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">Absolutely. Many of our patients travel from across India and abroad. You can
+                        schedule a virtual consultation before visiting our <?= esc($cityName) ?> center for your procedure.</div>
                 </div>
-                <div class="faq-a">
-                    Yes. You can book a virtual consultation from anywhere in India or abroad. 
-                    We also assist with planning your visit and treatment schedule if you’re travelling to <?= esc($cityName) ?>.
-                </div>
-            </div>
 
-            <!-- FAQ 9 -->
-            <div class="faq-item">
-                <div class="faq-q">What kind of post-surgery care does AK Clinics provide?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">What kind of post-surgery care does AK Clinics provide?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">We offer complete follow-up support, including hair wash guidance, recovery
+                        monitoring, and long-term maintenance advice until results are fully achieved.</div>
                 </div>
-                <div class="faq-a">
-                    We provide complete post-op support, including hair wash guidance, medications, 
-                    regular follow-ups, and growth monitoring for up to 12 months.
-                </div>
-            </div>
 
-            <!-- FAQ 10 -->
-            <div class="faq-item">
-                <div class="faq-q">Which technique works better for me, Bio-FUE or DHI?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
-                    </svg>
+                <div class="faq-item">
+                    <div class="faq-q">Which is better — Bio-FUE or DHI technique?
+                        <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
+                            <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2" />
+                        </svg>
+                    </div>
+                    <div class="faq-a">Both techniques are effective, but Bio-FUE offers more precision and customization. The grafts are extracted and implanted as per your hair length using special tools, ensuring smooth placement and over 95% success rate - that’s why it’s our most preferred method at AK Clinics.</div>
                 </div>
-                <div class="faq-a">
-                    Both techniques give excellent results. The right choice depends on your donor area, 
-                    graft requirement, and the look you want to achieve. 
-                    Your surgeon will guide you on the most suitable option during your consultation.
-                </div>
-            </div>
-            <!-- FAQ 11 -->
-            <div class="faq-item">
-                <div class="faq-q">What is the cost of 2000 grafts in <?= esc($cityName) ?>?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="faq-a">
-                    The cost of 2000 grafts varies for every patient because it depends on 
-                    the technique used, your donor quality, and the baldness area. 
-                    A scalp analysis helps determine the exact requirement and cost.
-                </div>
-            </div>
 
-            <!-- FAQ 12 -->
-            <div class="faq-item">
-                <div class="faq-q">How much does a 2500 graft hair transplant cost?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="faq-a">
-                    The cost of 2500 grafts depends on your density goals, hairline design,
-                    and the overall complexity of the case. 
-                    We share accurate details after evaluating your scalp.
-                </div>
             </div>
-
-            <!-- FAQ 13 -->
-            <div class="faq-item">
-                <div class="faq-q">What is the cost of 3000 grafts at AK Clinics?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="faq-a">
-                    Pricing for 3000 grafts depends on donor availability, 
-                    technique (Bio-FUE or DHI), and the area that needs coverage. 
-                    A personalised plan is created after a proper assessment.
-                </div>
-            </div>
-
-             <!-- FAQ 15 -->
-            <div class="faq-item">
-                <div class="faq-q">How much does a 5000 graft hair transplant cost?
-                    <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                        <path d="M6 9l6 6 6-6" stroke="#111" stroke-width="2"/>
-                    </svg>
-                </div>
-                <div class="faq-a">
-                    A 5000-graft transplant is usually needed for advanced baldness. 
-                    The cost varies based on technique, donor supply, and whether additional graft sources are needed. 
-                    We provide a detailed plan after assessing your scalp.
-                </div>
-            </div>
-
         </div>
-    </div>
-</section>
-
+    </section>
 
     <!-- ===== Cost Calculator CTA Widget ===== -->
     <section class="cta-widget">
         <div class="container">
-            <h3>Need a hair transplant and not sure where to start?</h3>
-            <p>Get a quick estimate with our 3-step cost calculator. Takes under a minute.</p>
-            <button class="cta-btn-white" id="openCalc">Free Cost Calculator</button>
+            <h3>Want to know your cost before you book?</h3>
+            <p>Get a quick graft and cost estimate with our 3-step calculator. Takes under a minute.</p>
+            <button class="cta-btn-white" id="openCalc">Get My Cost Estimate</button>
         </div>
     </section>
 
@@ -1360,6 +1254,10 @@ function gtag_report_conversion(url) {
     <div class="modal-overlay" id="calcModal" aria-hidden="true">
         <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="calcTitle">
             <button class="modal-close" id="closeCalc" aria-label="Close">&times;</button>
+            <div style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin:4px 0 6px" id="modalStepLabel">STEP 1 OF 4</div>
+            <div style="height:4px;background:#eef1f6;border-radius:999px;overflow:hidden;margin-bottom:16px">
+                <div id="modalProgressFill" style="height:100%;width:25%;background:var(--brand);transition:width .25s"></div>
+            </div>
           <form id="calcForm" enctype="multipart/form-data">
             <!-- Step 1 -->
             <div class="step active" id="step1">
@@ -1519,8 +1417,9 @@ function gtag_report_conversion(url) {
     <div class="mobile-bar">
         <a class="mobile-btn wa"
             href="<?= esc($wa_url) ?>"
+            onclick="return gtag_report_conversion();"
             target="_blank" rel="noopener"><svg class="wa-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.62-.92-2.22-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.8.37-.27.3-1.04 1.02-1.04 2.48 0 1.46 1.07 2.88 1.21 3.08.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.29.17-1.41-.07-.13-.27-.2-.57-.35M12.05 21.79h-.01a9.87 9.87 0 0 1-5.03-1.38l-.36-.21-3.74.98 1-3.65-.24-.37a9.86 9.86 0 0 1-1.51-5.26c0-5.45 4.44-9.88 9.89-9.88 2.64 0 5.12 1.03 6.99 2.9a9.82 9.82 0 0 1 2.89 6.99c0 5.45-4.44 9.88-9.89 9.88m8.41-18.3A11.81 11.81 0 0 0 12.05 0C5.5 0 .16 5.34.16 11.89c0 2.1.55 4.14 1.59 5.95L.06 24l6.3-1.65a11.88 11.88 0 0 0 5.68 1.45h.01c6.55 0 11.89-5.34 11.89-11.89 0-3.18-1.24-6.16-3.48-8.41"/></svg><span>WhatsApp</span></a>
-        <a class="mobile-btn primary" href="tel:<?= esc($phone, 'attr') ?>">Call Now</a>
+        <a class="mobile-btn primary" href="tel:<?= esc($phone, 'attr') ?>" onclick="return gtag_report_conversion();">Call Now</a>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1684,6 +1583,29 @@ document.addEventListener("DOMContentLoaded", function() {
     cursor: not-allowed;
   }
 </style>
+
+<script>
+(function(){
+  var fill = document.getElementById('modalProgressFill');
+  var label = document.getElementById('modalStepLabel');
+  if (!fill || !label) return;
+  function setStep(n){
+    fill.style.width = (n * 25) + '%';
+    label.textContent = 'STEP ' + n + ' OF 4';
+  }
+  var map = {
+    'openCalc': 1, 'calcFab': 1,
+    'toStep2': 2, 'backTo1': 1,
+    'toStep3': 3, 'backTo2': 2
+  };
+  Object.keys(map).forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', function(){ setStep(map[id]); });
+  });
+  var form = document.getElementById('calcForm');
+  if (form) form.addEventListener('submit', function(){ setStep(4); });
+})();
+</script>
 
 </body>
 

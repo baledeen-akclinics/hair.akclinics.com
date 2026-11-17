@@ -66,7 +66,11 @@ class LandingContext
             . '?text=' . rawurlencode($waMessage)
             . '&utm_source=google&utm_medium=cpc&utm_campaign=' . rawurlencode($waCampaign);
 
-        $assetBase = base_url('landing/' . $pageType . '/');
+        // A page type can reuse another page type's physical assets (image/img/css/js)
+        // via 'asset_path' in its pageTypes config entry, instead of duplicating files.
+        // e.g. candidacy/outstation reuse hair-transplant's assets.
+        $assetPageType = $page['asset_path'] ?? $pageType;
+        $assetBase = base_url('landing/' . $assetPageType . '/');
         $landingPageUrl = site_url($pageType . '/' . $location);
 
         return [
