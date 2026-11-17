@@ -58,6 +58,12 @@
                         <?php endforeach; ?>
                     </select>
 
+                    <label class="consent-label" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;cursor:pointer;color:#444">
+                        <input type="checkbox" name="contact_consent" value="1" required style="margin-top:3px;flex-shrink:0">
+                        <span>I agree to be contacted by AK Clinics via call, SMS, WhatsApp, or email regarding my enquiry.</span>
+                    </label>
+                    <label id="contact_consent-error" class="error contact-consent-error" for="contact_consent" style="display:none"></label>
+
                     <button type="submit" class="btn-primary">Submit Now</button>
                 </form>
                 <div id="sendlead-show" style="display:none;">Thank you! Your lead is submitted.</div>

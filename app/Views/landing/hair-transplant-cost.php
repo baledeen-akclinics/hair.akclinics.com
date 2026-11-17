@@ -239,6 +239,12 @@ function gtag_report_conversion(url) {
                         <?php endforeach; ?>
                     </select>
 
+                    <label class="consent-label" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;cursor:pointer;color:#444">
+                        <input type="checkbox" name="contact_consent" value="1" required style="margin-top:3px;flex-shrink:0">
+                        <span>I agree to be contacted by AK Clinics via call, SMS, WhatsApp, or email regarding my enquiry.</span>
+                    </label>
+                    <label id="contact_consent-error" class="error contact-consent-error" for="contact_consent" style="display:none"></label>
+
                     <button type="submit" class="btn-primary">Submit Now<i class="fas fa-arrow-right"></i></button>
                 </form>
                 <div id="sendlead-show" style="display:none;">Thank you! Your lead is submitted.</div>
@@ -1399,6 +1405,11 @@ function gtag_report_conversion(url) {
                     <input class="input" id="ccPhone"  type="number" placeholder="Phone*" name="mobile_no" autocomplete="tel">
                     <input class="input" id="ccCity" placeholder="City*" name="cliniccity" autocomplete="address-level2">
                     <input class="input" id="ccEmail" placeholder="Email (optional)"  name="email" autocomplete="email">
+                    <label class="consent-label" style="display:flex;gap:8px;align-items:flex-start;font-size:13px;line-height:1.4;cursor:pointer;color:#444;grid-column:1/-1;margin-top:4px">
+                        <input type="checkbox" name="contact_consent" value="1" required style="margin-top:3px;flex-shrink:0">
+                        <span>I agree to be contacted by AK Clinics via call, SMS, WhatsApp, or email regarding my enquiry.</span>
+                    </label>
+                    <label id="calc_contact_consent-error" class="error contact-consent-error" for="contact_consent" style="display:none;grid-column:1/-1"></label>
                 </div>
                 <!-- <div class="modal-actions">
                     <button class="btn primary" id="toStep2">Continue</button>
@@ -1544,50 +1555,26 @@ window.__LEAD_ATTRIBUTION_SERVER_TIME__ = <?= json_encode(date('c')) ?>;
 </script>
 <script src="<?= esc(base_url('js/landing-tracking.js')) ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?= esc(base_url('js/landing-forms.js')) ?>"></script>
-<script src="<?= esc(base_url('js/landing-calculator.js')) ?>"></script>
+<script src="<?= esc(base_url('js/landing-forms.js')) ?>?v=consent4"></script>
+<script src="<?= esc(base_url('js/landing-calculator.js')) ?>?v=consent4"></script>
 <script type='text/javascript'>
             (function(I, L, T, i, c, k, s) {if(I.iticks) return;I.iticks = {host:c, settings:s, clientId:k, cdn:L, queue:[]};var h = T.head || T.documentElement;var e = T.createElement(i);var l = I.location;e.async = true;e.src = (L||c)+'/client/inject-v2.min.js';h.insertBefore(e, h.firstChild);I.iticks.call = function(a, b) {I.iticks.queue.push([a, b]);};})(window, 'https://cdn-v1.intelliticks.com/prod/common', document, 'script', 'https://app.intelliticks.com', 'kEEbS63MgGiojbePd_c', {});
     </script>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-  const nameInput = document.getElementById("ccName");
   const phoneInput = document.getElementById("ccPhone");
-  const cityInput = document.getElementById("ccCity");
   const continueBtn = document.getElementById("toStep2");
-
-  if (!nameInput || !phoneInput || !cityInput || !continueBtn) return;
-  continueBtn.disabled = true;
-  continueBtn.classList.add("disabled");
-
-  // Allow only numbers and one '+' at the start
+  // Keep Continue clickable so validation can highlight empty fields
+  if (continueBtn) {
+    continueBtn.disabled = false;
+    continueBtn.classList.remove("disabled");
+    continueBtn.removeAttribute("disabled");
+  }
+  if (!phoneInput) return;
   phoneInput.addEventListener("input", function() {
     this.value = this.value
-      .replace(/[^\d+]/g, '')      // allow digits and '+'
-      .replace(/(?!^)\+/g, '');    // only one '+' allowed at the start
-  });
-
-  function validateInputs() {
-    const name = nameInput.value.trim();
-    const phone = phoneInput.value.trim();
-    const city = cityInput.value.trim();
-
-    // Validate phone: between 10 and 14 digits (excluding '+')
-    const phoneDigits = phone.replace(/\D/g, '');
-    const isPhoneValid = phoneDigits.length >= 10 && phoneDigits.length <= 14;
-
-    if (name !== "" && isPhoneValid && city !== "") {
-      continueBtn.disabled = false;
-      continueBtn.classList.remove("disabled");
-    } else {
-      if (!nameInput || !phoneInput || !cityInput || !continueBtn) return;
-  continueBtn.disabled = true;
-      continueBtn.classList.add("disabled");
-    }
-  }
-
-  [nameInput, phoneInput, cityInput].forEach(input => {
-    input.addEventListener("input", validateInputs);
+      .replace(/[^\d+]/g, '')
+      .replace(/(?!^)\+/g, '');
   });
 });
 </script>

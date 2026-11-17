@@ -93,6 +93,11 @@ class CampaignLeadService
             $payload['city'] = $city;
         }
 
+        $payload['contact_consent'] = filter_var(
+            $form['contact_consent'] ?? false,
+            FILTER_VALIDATE_BOOLEAN
+        );
+
         $optionalContext = [
             'description',
             'campaign_id',

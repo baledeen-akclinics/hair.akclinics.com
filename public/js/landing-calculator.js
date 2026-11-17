@@ -8,6 +8,68 @@
 
   if (!$ || !window.AK_LANDING) return;
 
+  var FIELD_ERROR = 'ak-field-error';
+  var STEP_IDS = ['step1', 'step2', 'step3', 'step4'];
+
+  function ensureErrorStyles() {
+    if (document.getElementById('ak-form-error-styles')) {
+      var existing = window.AK_FORM_ERRORS;
+      if (existing && existing.fieldErrorClass) FIELD_ERROR = existing.fieldErrorClass;
+      return;
+    }
+    if (window.AK_FORM_ERRORS && window.AK_FORM_ERRORS.ensureErrorStyles) {
+      window.AK_FORM_ERRORS.ensureErrorStyles();
+      FIELD_ERROR = window.AK_FORM_ERRORS.fieldErrorClass || FIELD_ERROR;
+      return;
+    }
+    var style = document.createElement('style');
+    style.id = 'ak-form-error-styles';
+    style.textContent = [
+      '.' + FIELD_ERROR + '{border-color:#e53935!important;background:#fff5f5!important;box-shadow:0 0 0 2px rgba(229,57,53,.18)!important}',
+      'select.' + FIELD_ERROR + '{color:#b71c1c}',
+      '.consent-label.' + FIELD_ERROR + ',.consent-label.is-invalid{outline:2px solid #e53935;outline-offset:3px;border-radius:8px;background:rgba(229,57,53,.06)!important;padding:6px;margin:-6px;box-shadow:none!important;border:none!important}',
+      '#scaleGrid.' + FIELD_ERROR + '{outline:2px solid #e53935;outline-offset:4px;border-radius:12px}',
+      'form label.error,.contact-consent-error{color:#e53935;font-size:12px;display:block;margin-top:4px;font-weight:500}'
+    ].join('');
+    document.head.appendChild(style);
+  }
+
+  function goToStep(index) {
+    STEP_IDS.forEach(function (id, idx) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.toggle('active', idx === index);
+      // Clear any prior jQuery hide/show inline styles
+      el.style.display = '';
+    });
+  }
+
+  function setFieldError($el, on) {
+    if (!$el || !$el.length) return;
+
+    if ($el.is('[name="contact_consent"]')) {
+      $el.closest('.consent-label').toggleClass(FIELD_ERROR + ' is-invalid', !!on);
+      return;
+    }
+
+    $el.toggleClass(FIELD_ERROR, !!on);
+  }
+
+  function clearCalcErrors() {
+    $('#calcForm').find('.' + FIELD_ERROR).removeClass(FIELD_ERROR);
+    $('#calcForm .consent-label').removeClass('is-invalid ' + FIELD_ERROR);
+    $('#calcForm .contact-consent-error').text('').hide();
+    $('#scaleGrid').removeClass(FIELD_ERROR);
+  }
+
+  function setConsentMessage($consent, msg) {
+    var $slot = $consent.closest('.consent-label').next('.contact-consent-error');
+    if ($slot.length) {
+      if (msg) $slot.text(msg).show();
+      else $slot.text('').hide();
+    }
+  }
+
   function attributionPayload() {
     if (typeof window.getLeadAttributionForApi === 'function') {
       return window.getLeadAttributionForApi() || {};
@@ -29,7 +91,8 @@
       form_id: formId,
       page_type: cfg.pageType,
       location_slug: cfg.locationSlug,
-      norwood_stage: $('#norwoodStage').val() || ''
+      norwood_stage: $('#norwoodStage').val() || '',
+      contact_consent: $form.find('[name="contact_consent"]').is(':checked')
     };
 
     var attr = attributionPayload();
@@ -101,25 +164,88 @@
     });
   }
 
-  $(function () {
-    var leadSubmitted = false;
+  /**
+   * Validate calculator step-1 fields and highlight EVERY invalid field.
+   * @returns {{ok:boolean, message:string}}
+   */
+  function validateCalcStep1() {
+    ensureErrorStyles();
 
-    // Step 1 → 2: validate + submit lead early (matches prior UX)
-    $('#toStep2').off('click').on('click', function () {
-      var name = ($('#ccName').val() || '').trim();
-      var phone = ($('#ccPhone').val() || '').trim();
-      var city = ($('#ccCity').val() || '').trim();
-      var email = ($('#ccEmail').val() || '').trim();
-      var phoneDigits = phone.replace(/\D/g, '');
+    var $name = $('#ccName');
+    var $phone = $('#ccPhone');
+    var $city = $('#ccCity');
+    var $email = $('#ccEmail');
+    var $consent = $('#calcForm').find('[name="contact_consent"]');
 
-      if (!name) { showMessage('Please enter your name', true); return; }
-      if (phoneDigits.length < 10 || phoneDigits.length > 14) {
-        showMessage('Please enter a valid phone number (10-14 digits)', true);
-        return;
-      }
-      if (!city) { showMessage('Please enter your city', true); return; }
-      if (email && !/^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) {
-        showMessage('Please enter a valid email', true);
+    var name = ($name.val() || '').trim();
+    var phone = ($phone.val() || '').trim();
+    var city = ($city.val() || '').trim();
+    var email = ($email.val() || '').trim();
+    var phoneDigits = phone.replace(/\D/g, '');
+
+    clearCalcErrors();
+
+    var firstInvalid = null;
+    var messages = [];
+
+    if (!$name.length || !name) {
+      setFieldError($name, true);
+      messages.push('Please enter your name');
+      firstInvalid = firstInvalid || $name;
+    }
+    if (!$phone.length || phoneDigits.length < 10 || phoneDigits.length > 14) {
+      setFieldError($phone, true);
+      messages.push('Please enter a valid phone number (10-14 digits)');
+      firstInvalid = firstInvalid || $phone;
+    }
+    if ($city.length && !city) {
+      setFieldError($city, true);
+      messages.push('Please enter your city');
+      firstInvalid = firstInvalid || $city;
+    }
+    if (email && !/^[\w.+-]+@([\w-]+\.)+[\w-]{2,}$/.test(email)) {
+      setFieldError($email, true);
+      messages.push('Please enter a valid email');
+      firstInvalid = firstInvalid || $email;
+    }
+    if ($consent.length && !$consent.is(':checked')) {
+      setFieldError($consent, true);
+      setConsentMessage($consent, 'Contact consent is required.');
+      messages.push('Contact consent is required.');
+      firstInvalid = firstInvalid || $consent;
+    }
+
+    if (firstInvalid && firstInvalid.length) {
+      try {
+        firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (e) { /* ignore */ }
+      firstInvalid.trigger('focus');
+    }
+
+    return {
+      ok: messages.length === 0,
+      message: messages[0] || ''
+    };
+  }
+
+  function bindContinue() {
+    var btn = document.getElementById('toStep2');
+    if (!btn) return;
+
+    // Drop any native listeners from legacy assets/script.js
+    var fresh = btn.cloneNode(true);
+    fresh.disabled = false;
+    fresh.classList.remove('disabled');
+    fresh.removeAttribute('disabled');
+    btn.parentNode.replaceChild(fresh, btn);
+
+    $(fresh).on('click', function (e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      var check = validateCalcStep1();
+      if (!check.ok) {
+        // Field highlights only — no SweetAlert on Continue
         return;
       }
 
@@ -127,19 +253,29 @@
       $btn.prop('disabled', true);
 
       postLead('calcForm', function () {
-        leadSubmitted = true;
-        $('#step1').hide();
-        $('#step2').show();
+        window.__AK_CALC_LEAD_SUBMITTED__ = true;
+        goToStep(1);
         $btn.prop('disabled', false);
       }, function (msg) {
         showMessage(msg, true);
         $btn.prop('disabled', false);
       });
     });
+  }
+
+  $(function () {
+    ensureErrorStyles();
+    bindContinue();
+
+    $('#calcForm').on('input change', '.input, select, [name="contact_consent"]', function () {
+      setFieldError($(this), false);
+      if ($(this).is('[name="contact_consent"]')) {
+        setConsentMessage($(this), '');
+      }
+    });
 
     $('#backTo1').off('click').on('click', function () {
-      $('#step2').hide();
-      $('#step1').show();
+      goToStep(0);
     });
 
     $('.scale-card').off('click').on('click', function () {
@@ -147,20 +283,21 @@
       $(this).addClass('active');
       $('#norwoodStage').val($(this).data('stage'));
       $('#toStep3').prop('disabled', false);
+      $('#scaleGrid').removeClass(FIELD_ERROR);
     });
 
     $('#toStep3').off('click').on('click', function () {
       if (!$('#norwoodStage').val()) {
+        $('#scaleGrid').addClass(FIELD_ERROR);
         showMessage('Please select a hair loss stage', true);
         return;
       }
-      $('#step2').hide();
-      $('#step3').show();
+      $('#scaleGrid').removeClass(FIELD_ERROR);
+      goToStep(2);
     });
 
     $('#backTo2').off('click').on('click', function () {
-      $('#step3').hide();
-      $('#step2').show();
+      goToStep(1);
     });
 
     // Final submit: if lead already sent at step1, just show results; else submit now
@@ -170,6 +307,7 @@
 
       var userName = ($('#ccName').val() || '').trim();
       var norwoodStage = parseInt($('#norwoodStage').val(), 10) || 0;
+      var leadSubmitted = !!window.__AK_CALC_LEAD_SUBMITTED__;
 
       function showThanks() {
         $('#thanksName').text(userName);
@@ -177,8 +315,7 @@
         if ($('#treatmentMessage').length) {
           $('#treatmentMessage').html(treatmentMessage(norwoodStage));
         }
-        $('#step3').hide();
-        $('#step4').show();
+        goToStep(3);
       }
 
       if (leadSubmitted) {
@@ -186,8 +323,15 @@
         return;
       }
 
+      var check = validateCalcStep1();
+      if (!check.ok) {
+        goToStep(0);
+        showMessage(check.message, true);
+        return;
+      }
+
       postLead('calcForm', function () {
-        leadSubmitted = true;
+        window.__AK_CALC_LEAD_SUBMITTED__ = true;
         showThanks();
       }, function (msg) {
         showMessage(msg, true);
@@ -195,8 +339,9 @@
     });
 
     $('#closeDone').off('click').on('click', function () {
-      $('#calcModal').removeClass('open').attr('aria-hidden', 'true');
+      $('#calcModal').removeClass('open show').attr('aria-hidden', 'true');
       $('body').removeClass('modal-open');
+      document.body.style.overflow = '';
     });
   });
 })(window, document, window.jQuery);

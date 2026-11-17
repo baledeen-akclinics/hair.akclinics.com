@@ -49,11 +49,8 @@ const getFreeAssementBtn3 = document.getElementById('get-free-assement-btn3');
   const cityEl=document.getElementById('ccCity');
   function goTo(i){steps.forEach((s,idx)=>s&&s.classList.toggle('active',idx===i));}
 
+  // Continue (#toStep2) is handled by landing-calculator.js (validation + field highlight)
   const toStep2=document.getElementById('toStep2');
-  if(toStep2)toStep2.addEventListener('click',()=>{
-    if(!nameEl?.value.trim()||!phoneEl?.value.trim()||!cityEl?.value.trim()){alert('Please enter your name, phone and city to proceed.');return;}
-    goTo(1);
-  });
   const backTo1=document.getElementById('backTo1');
   if(backTo1)backTo1.addEventListener('click',()=>goTo(0));
 

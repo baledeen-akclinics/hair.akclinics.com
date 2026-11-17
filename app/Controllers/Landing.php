@@ -76,6 +76,18 @@ class Landing extends BaseController
             ]);
         }
 
+        $contactConsent = filter_var($input['contact_consent'] ?? false, FILTER_VALIDATE_BOOLEAN);
+        if (! $contactConsent) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'      => false,
+                'message' => 'Contact consent is required.',
+                'errors'  => [
+                    'contact_consent' => ['Contact consent is required.'],
+                ],
+            ]);
+        }
+        $input['contact_consent'] = true;
+
         $formName = $formId === 'calcForm'
             ? $context['page']['form_name_calc']
             : $context['page']['form_name_hero'];
