@@ -34,6 +34,31 @@ class Landing extends BaseController
     }
 
     /**
+     * Post-lead thank you page.
+     * GET /thank-you
+     */
+    public function thankYou(): string
+    {
+        $back = (string) ($this->request->getGet('back') ?? '');
+        $backUrl = site_url('/');
+
+        if ($back !== '') {
+            // Only allow internal relative landing paths
+            $back = '/' . ltrim($back, '/');
+            if (preg_match('#^/(landing/)?hair-transplant/(delhi|bangalore|ludhiana)/candidacy/?$#', $back)
+                || preg_match('#^/(landing/)?(hair-transplant|hair-transplant-cost|hair-transplant-candidacy|hair-treatments|laser-hair-removal)/(delhi|bangalore|ludhiana)/?$#', $back)
+            ) {
+                $backUrl = site_url(ltrim($back, '/'));
+            }
+        }
+
+        return view('landing/thank-you', [
+            'back_url' => $backUrl,
+            'gtag_id'  => 'AW-1014342854',
+        ]);
+    }
+
+    /**
      * AJAX lead submission → Campaign Leads API.
      * POST /landing/submit-lead
      */

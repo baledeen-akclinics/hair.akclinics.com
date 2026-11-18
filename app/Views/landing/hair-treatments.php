@@ -496,7 +496,7 @@ $addressPhrase = $loc['address_phrase'];
   <div class="topbar">
     <div class="container">
       <div>#1 <?= esc($page['service']) ?> in <?= esc($topbarCity) ?></div>
-      <div><a href="tel:<?= esc($phone, 'attr') ?>">Call: +91-62399 57752</a></div>
+      <div><a href="tel:<?= esc($phone, 'attr') ?>">Call: <?= esc($phoneDisplay) ?></a></div>
     </div>
   </div>
 
@@ -1834,7 +1834,8 @@ window.AK_LANDING = {
   submitUrl: <?= json_encode($submit_url) ?>,
   pageType: <?= json_encode($page_type) ?>,
   locationSlug: <?= json_encode($location_slug) ?>,
-city: <?= json_encode($cityName) ?>
+  thanksUrl: <?= json_encode($thanks_url) ?>,
+  city: <?= json_encode($cityName) ?>
 };
 </script>
 <script>
@@ -1842,8 +1843,8 @@ window.__LEAD_ATTRIBUTION_SERVER_TIME__ = <?= json_encode(date('c')) ?>;
 </script>
 <script src="<?= esc(base_url('js/landing-tracking.js')) ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?= esc(base_url('js/landing-forms.js')) ?>?v=consent4"></script>
-<script src="<?= esc(base_url('js/landing-calculator.js')) ?>?v=consent4"></script>
+<script src="<?= esc(base_url('js/landing-forms.js')) ?>?v=thanks1"></script>
+<script src="<?= esc(base_url('js/landing-calculator.js')) ?>?v=thanks1"></script>
 <script type='text/javascript'>
     (function(I, L, T, i, c, k, s) {
       if (I.iticks) return;

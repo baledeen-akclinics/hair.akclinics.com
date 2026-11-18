@@ -66,8 +66,15 @@ class LandingContext
             . '?text=' . rawurlencode($waMessage)
             . '&utm_source=google&utm_medium=cpc&utm_campaign=' . rawurlencode($waCampaign);
 
-        $assetBase = base_url('landing/' . $pageType . '/');
-        $landingPageUrl = site_url($pageType . '/' . $location);
+        $assetPageType = (string) ($page['asset_page_type'] ?? $pageType);
+        $assetBase     = base_url('landing/' . $assetPageType . '/');
+
+        if (! empty($page['public_path'])) {
+            $publicPath = str_replace('{location}', $location, (string) $page['public_path']);
+            $landingPageUrl = site_url($publicPath);
+        } else {
+            $landingPageUrl = site_url($pageType . '/' . $location);
+        }
 
         return [
             'location'              => $loc,
@@ -89,6 +96,7 @@ class LandingContext
             'clinic_options'        => $this->config->clinicOptions,
             'city'                  => $loc['name'],
             'submit_url'            => site_url('submit-lead'),
+            'thanks_url'            => site_url('thank-you'),
         ];
     }
 }

@@ -109,10 +109,38 @@
     window.alert(msg);
   }
 
+  function thanksRedirectUrl() {
+    var cfg = window.AK_LANDING || {};
+    var base = cfg.thanksUrl;
+    if (!base) return '';
+    var sep = base.indexOf('?') >= 0 ? '&' : '?';
+    return base + sep + 'back=' + encodeURIComponent(window.location.pathname || '');
+  }
+
+  function redirectToThankYou() {
+    var url = thanksRedirectUrl();
+    if (!url) return false;
+
+    if (typeof gtag_report_conversion === 'function') {
+      try { gtag_report_conversion(url); } catch (e) { /* ignore */ }
+    }
+    if (typeof gtag === 'function') {
+      try { gtag('event', 'lead_submission'); } catch (e) { /* ignore */ }
+    }
+
+    window.location.href = url;
+    return true;
+  }
+
   function handleSuccess(res, $form) {
-    var msg = SUCCESS_MSG;
     $form.find('button[type="submit"]').prop('disabled', true);
 
+    if (redirectToThankYou()) {
+      return;
+    }
+
+    // Fallback if thanks URL is not configured
+    var msg = SUCCESS_MSG;
     if (typeof gtag_report_conversion === 'function') {
       try { gtag_report_conversion(); } catch (e) { /* ignore */ }
     }
