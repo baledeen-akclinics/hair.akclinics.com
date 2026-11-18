@@ -118,6 +118,29 @@
     window.alert(msg);
   }
 
+  function thanksRedirectUrl() {
+    var cfg = window.AK_LANDING || {};
+    var base = cfg.thanksUrl;
+    if (!base) return '';
+    var sep = base.indexOf('?') >= 0 ? '&' : '?';
+    return base + sep + 'back=' + encodeURIComponent(window.location.pathname || '');
+  }
+
+  function redirectToThankYou() {
+    var url = thanksRedirectUrl();
+    if (!url) return false;
+
+    if (typeof gtag_report_conversion === 'function') {
+      try { gtag_report_conversion(url); } catch (e) { /* ignore */ }
+    }
+    if (typeof gtag === 'function') {
+      try { gtag('event', 'lead_submission'); } catch (e) { /* ignore */ }
+    }
+
+    window.location.href = url;
+    return true;
+  }
+
   function treatmentMessage(stage) {
     var map = {
       1: 'Treatment Required: Medical management (PRP, growth factors, medications like Minoxidil & Finasteride) is the best option in your case.',
@@ -310,6 +333,11 @@
       var leadSubmitted = !!window.__AK_CALC_LEAD_SUBMITTED__;
 
       function showThanks() {
+        // Final step → thank-you page
+        if (redirectToThankYou()) {
+          return;
+        }
+
         $('#thanksName').text(userName);
         $('#nwStage').text(norwoodStage || '-');
         if ($('#treatmentMessage').length) {
@@ -326,7 +354,6 @@
       var check = validateCalcStep1();
       if (!check.ok) {
         goToStep(0);
-        showMessage(check.message, true);
         return;
       }
 

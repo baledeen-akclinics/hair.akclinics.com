@@ -1435,7 +1435,8 @@ window.AK_LANDING = {
   submitUrl: <?= json_encode($submit_url) ?>,
   pageType: <?= json_encode($page_type) ?>,
   locationSlug: <?= json_encode($location_slug) ?>,
-city: <?= json_encode($cityName) ?>
+  thanksUrl: <?= json_encode($thanks_url) ?>,
+  city: <?= json_encode($cityName) ?>
 };
 </script>
 <script>
@@ -1443,8 +1444,8 @@ window.__LEAD_ATTRIBUTION_SERVER_TIME__ = <?= json_encode(date('c')) ?>;
 </script>
 <script src="<?= esc(base_url('js/landing-tracking.js')) ?>"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="<?= esc(base_url('js/landing-forms.js')) ?>?v=consent4"></script>
-<script src="<?= esc(base_url('js/landing-calculator.js')) ?>?v=consent4"></script>
+<script src="<?= esc(base_url('js/landing-forms.js')) ?>?v=thanks1"></script>
+<script src="<?= esc(base_url('js/landing-calculator.js')) ?>?v=thanks1"></script>
 <script type='text/javascript'>
             (function(I, L, T, i, c, k, s) {if(I.iticks) return;I.iticks = {host:c, settings:s, clientId:k, cdn:L, queue:[]};var h = T.head || T.documentElement;var e = T.createElement(i);var l = I.location;e.async = true;e.src = (L||c)+'/client/inject-v2.min.js';h.insertBefore(e, h.firstChild);I.iticks.call = function(a, b) {I.iticks.queue.push([a, b]);};})(window, 'https://cdn-v1.intelliticks.com/prod/common', document, 'script', 'https://app.intelliticks.com', 'kEEbS63MgGiojbePd_c', {});
     </script>

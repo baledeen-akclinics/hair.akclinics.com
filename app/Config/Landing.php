@@ -28,6 +28,7 @@ class Landing extends BaseConfig
     public array $pageTypeSlugs = [
         'hair-transplant',
         'hair-transplant-cost',
+        'hair-transplant-candidacy',
         'hair-treatments',
         'laser-hair-removal',
     ];
@@ -54,8 +55,9 @@ class Landing extends BaseConfig
             'name'            => 'Delhi',
             'display_name'    => 'Delhi',
             'possessive'      => "Delhi's",
-            'phone'           => '6239957752',
-            'phone_display'   => '+91-6239957752',
+            // Override via .env: landing.locations.delhi.phone / phone_display
+            'phone'           => '7087046120',
+            'phone_display'   => '+91 70870 46120',
             'address_short'   => 'Greater Kailash (GK-1)',
             'address_phrase'  => 'Located in Greater Kailash (GK-1), our Delhi',
             'surgeries'       => '5,000+',
@@ -67,8 +69,9 @@ class Landing extends BaseConfig
             'name'            => 'Bangalore',
             'display_name'    => 'Bangalore',
             'possessive'      => "Bangalore's",
-            'phone'           => '08146442207',
-            'phone_display'   => '081464-42207',
+            // Override via .env: landing.locations.bangalore.phone / phone_display
+            'phone'           => '7087001629',
+            'phone_display'   => '+91 70870 01629',
             'address_short'   => 'Indiranagar',
             'address_phrase'  => 'Located in Indiranagar, our Bengaluru',
             'surgeries'       => '10,000+',
@@ -80,8 +83,9 @@ class Landing extends BaseConfig
             'name'            => 'Ludhiana',
             'display_name'    => 'Ludhiana',
             'possessive'      => "Ludhiana's",
-            'phone'           => '07888835026',
-            'phone_display'   => '07888835026',
+            // Override via .env: landing.locations.ludhiana.phone / phone_display
+            'phone'           => '7087045805',
+            'phone_display'   => '+91 70870 45805',
             'address_short'   => 'Sharabha Nagar & South City',
             'address_phrase'  => 'Located in Sharabha Nagar & South City, our Ludhiana',
             'surgeries'       => '5,000+',
@@ -123,6 +127,20 @@ class Landing extends BaseConfig
             'css_version'           => '2',
             'hero_preload'          => 'image/hair-transplant-results.webp',
         ],
+        'hair-transplant-candidacy' => [
+            'slug'                  => 'hair-transplant-candidacy',
+            'service'               => 'Hair transplant',
+            'form_name_hero'        => 'Hair Assessment',
+            'form_name_calc'        => 'Candidacy Assessment',
+            'source_id_prefix'      => 'landing-hair-transplant-candidacy',
+            'wa_campaign_suffix'    => 'HT-Candidacy',
+            'wa_message'            => "Hi, I'd like to check if I'm a candidate for a hair transplant in {city}. Can I get more information?",
+            'procedure_category_id' => 4, // Hair Transplant
+            'css_version'           => '2',
+            'hero_preload'          => 'image/hair-transplant-results.webp',
+            'asset_page_type'       => 'hair-transplant',
+            'public_path'           => 'landing/hair-transplant/{location}/candidacy',
+        ],
         'hair-treatments' => [
             'slug'                  => 'hair-treatments',
             'service'               => 'Hair Loss treatment',
@@ -152,23 +170,11 @@ class Landing extends BaseConfig
     /**
      * Per-location overrides for phones (when they differ by page type).
      * Key: "{pageType}.{location}"
+     * Left empty so every page type uses $locations phones (env-overridable).
      *
      * @var array<string, array{phone?: string, phone_display?: string}>
      */
-    public array $phoneOverrides = [
-        'hair-transplant.delhi'           => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant.bangalore'       => ['phone' => '08146442207', 'phone_display' => '081464-42207'],
-        'hair-transplant.ludhiana'        => ['phone' => '07888835026', 'phone_display' => '07888835026'],
-        'hair-transplant-cost.delhi'      => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant-cost.bangalore'  => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-transplant-cost.ludhiana'   => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'hair-treatments.delhi'           => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'hair-treatments.bangalore'       => ['phone' => '7087001629', 'phone_display' => '7087001629'],
-        'hair-treatments.ludhiana'        => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'laser-hair-removal.delhi'        => ['phone' => '6239957752', 'phone_display' => '+91-6239957752'],
-        'laser-hair-removal.bangalore'    => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-        'laser-hair-removal.ludhiana'     => ['phone' => '7888835026', 'phone_display' => '7888835026'],
-    ];
+    public array $phoneOverrides = [];
 
     /**
      * Per-page WhatsApp link overrides (replaces the generated wa.me URL).
@@ -177,8 +183,10 @@ class Landing extends BaseConfig
      * @var array<string, string>
      */
     public array $waUrlOverrides = [
-        'hair-transplant.delhi'     => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant.bangalore' => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant.delhi'              => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant.bangalore'          => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant-candidacy.delhi'     => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant-candidacy.bangalore' => 'https://wa.akclinics.com/AKC1285',
     ];
 
     /**
@@ -188,18 +196,21 @@ class Landing extends BaseConfig
      * @var array<string, string>
      */
     public array $legacyLeadSources = [
-        'hair-transplant.delhi'           => '158',
-        'hair-transplant.bangalore'       => '170',
-        'hair-transplant.ludhiana'        => '164',
-        'hair-transplant-cost.delhi'      => '158',
-        'hair-transplant-cost.bangalore'  => '170',
-        'hair-transplant-cost.ludhiana'   => '164',
-        'hair-treatments.delhi'           => '159',
-        'hair-treatments.bangalore'       => '171',
-        'hair-treatments.ludhiana'        => '165',
-        'laser-hair-removal.delhi'        => '160',
-        'laser-hair-removal.bangalore'    => '172',
-        'laser-hair-removal.ludhiana'     => '166',
+        'hair-transplant.delhi'                => '158',
+        'hair-transplant.bangalore'            => '170',
+        'hair-transplant.ludhiana'             => '164',
+        'hair-transplant-cost.delhi'           => '158',
+        'hair-transplant-cost.bangalore'       => '170',
+        'hair-transplant-cost.ludhiana'        => '164',
+        'hair-transplant-candidacy.delhi'      => '158',
+        'hair-transplant-candidacy.bangalore'  => '170',
+        'hair-transplant-candidacy.ludhiana'   => '164',
+        'hair-treatments.delhi'                => '159',
+        'hair-treatments.bangalore'            => '171',
+        'hair-treatments.ludhiana'             => '165',
+        'laser-hair-removal.delhi'             => '160',
+        'laser-hair-removal.bangalore'         => '172',
+        'laser-hair-removal.ludhiana'          => '166',
     ];
 
     /**
@@ -223,6 +234,21 @@ class Landing extends BaseConfig
             'title'       => 'Hair Transplant in Ludhiana | Cost, Surgeons & Bio-FUE Clinic – AK Clinics',
             'description' => "Ludhiana's top hair transplant clinic offering advanced Bio-FUE by expert surgeons. 5,000+ surgeries, transparent cost & 0% EMI. Book a free consultation!",
             'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/ludhiana',
+        ],
+        'hair-transplant-candidacy.delhi' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Delhi',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Delhi — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/delhi/candidacy',
+        ],
+        'hair-transplant-candidacy.bangalore' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Bangalore',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Bangalore — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/bangalore/candidacy',
+        ],
+        'hair-transplant-candidacy.ludhiana' => [
+            'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Ludhiana',
+            'description' => 'Doctor-led candidacy assessment for hair transplant in Ludhiana — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/ludhiana/candidacy',
         ],
         'hair-transplant-cost.delhi' => [
             'title'       => 'Hair Transplant Cost in Delhi – Get Exact Price & Free Assessment | AK Clinics',
@@ -285,9 +311,10 @@ class Landing extends BaseConfig
      * @var array<string, int|null>
      */
     public array $procedureCategoryIds = [
-        'hair-transplant'      => 4,
-        'hair-transplant-cost' => 4,
-        'hair-treatments'      => 5,
-        'laser-hair-removal'   => 3,
+        'hair-transplant'            => 4,
+        'hair-transplant-cost'       => 4,
+        'hair-transplant-candidacy'  => 4,
+        'hair-treatments'            => 5,
+        'laser-hair-removal'         => 3,
     ];
 }
