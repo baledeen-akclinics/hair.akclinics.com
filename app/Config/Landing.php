@@ -64,6 +64,8 @@ class Landing extends BaseConfig
             'address_phrase'  => 'Located in Greater Kailash (GK-1), our Delhi',
             'surgeries'       => '5,000+',
             'whatsapp'        => '919779028861',
+            // Override via .env: landing.locations.delhi.whatsapp_url
+            'whatsapp_url'    => 'https://wa.akclinics.com/AKC5192',
             'topbar_city'     => 'Delhi',
         ],
         'bangalore' => [
@@ -78,6 +80,8 @@ class Landing extends BaseConfig
             'address_phrase'  => 'Located in Indiranagar, our Bengaluru',
             'surgeries'       => '10,000+',
             'whatsapp'        => '919779028861',
+            // Override via .env: landing.locations.bangalore.whatsapp_url
+            'whatsapp_url'    => 'https://wa.akclinics.com/AKC1285',
             'topbar_city'     => 'Bengaluru',
         ],
         'ludhiana' => [
@@ -92,6 +96,8 @@ class Landing extends BaseConfig
             'address_phrase'  => 'Located in Sharabha Nagar & South City, our Ludhiana',
             'surgeries'       => '5,000+',
             'whatsapp'        => '919779028861',
+            // Override via .env: landing.locations.ludhiana.whatsapp_url
+            'whatsapp_url'    => 'https://wa.akclinics.com/AKC7820',
             'topbar_city'     => 'Ludhiana',
         ],
     ];
@@ -243,21 +249,12 @@ class Landing extends BaseConfig
     ];
 
     /**
-     * Per-page WhatsApp link overrides (replaces the generated wa.me URL).
-     * Key: "{pageType}.{location}"
+     * Optional per-page WhatsApp overrides (key: "{pageType}.{location}").
+     * Prefer location whatsapp_url; use this only when a page needs a different link.
      *
      * @var array<string, string>
      */
-    public array $waUrlOverrides = [
-        'hair-transplant.delhi'                => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant.bangalore'            => 'https://wa.akclinics.com/AKC1285',
-        'hair-transplant-candidacy.delhi'       => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant-candidacy.bangalore'   => 'https://wa.akclinics.com/AKC1285',
-        'hair-transplant-city-cost.delhi'       => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant-city-cost.bangalore'   => 'https://wa.akclinics.com/AKC1285',
-        'hair-transplant-outstation.delhi'      => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant-outstation.bangalore'  => 'https://wa.akclinics.com/AKC1285',
-    ];
+    public array $waUrlOverrides = [];
 
     /**
      * Legacy lead_source IDs from the previous CRM (kept as campaign_id when useful).
