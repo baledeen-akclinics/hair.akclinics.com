@@ -29,6 +29,8 @@ class Landing extends BaseConfig
         'hair-transplant',
         'hair-transplant-cost',
         'hair-transplant-candidacy',
+        'hair-transplant-city-cost',
+        'hair-transplant-outstation',
         'hair-treatments',
         'laser-hair-removal',
     ];
@@ -141,6 +143,34 @@ class Landing extends BaseConfig
             'asset_page_type'       => 'hair-transplant',
             'public_path'           => 'landing/hair-transplant/{location}/candidacy',
         ],
+        'hair-transplant-city-cost' => [
+            'slug'                  => 'hair-transplant-city-cost',
+            'service'               => 'Hair transplant',
+            'form_name_hero'        => 'Hair Assessment',
+            'form_name_calc'        => 'Cost Calculator',
+            'source_id_prefix'      => 'landing-hair-transplant-city-cost',
+            'wa_campaign_suffix'    => 'HT-Cost',
+            'wa_message'            => "Hi, I'm looking for hair transplant cost in {city}. Can I get more information?",
+            'procedure_category_id' => 4, // Hair Transplant
+            'css_version'           => '2',
+            'hero_preload'          => 'image/hair-transplant-results.webp',
+            'asset_page_type'       => 'hair-transplant',
+            'public_path'           => 'landing/hair-transplant/{location}/cost',
+        ],
+        'hair-transplant-outstation' => [
+            'slug'                  => 'hair-transplant-outstation',
+            'service'               => 'Hair transplant',
+            'form_name_hero'        => 'Hair Assessment',
+            'form_name_calc'        => 'Virtual Assessment',
+            'source_id_prefix'      => 'landing-hair-transplant-outstation',
+            'wa_campaign_suffix'    => 'HT-Outstation',
+            'wa_message'            => "Hi, I'm travelling for a hair transplant consultation in {city}. Can I get more information?",
+            'procedure_category_id' => 4, // Hair Transplant
+            'css_version'           => '2',
+            'hero_preload'          => 'image/hair-transplant-results.webp',
+            'asset_page_type'       => 'hair-transplant',
+            'public_path'           => 'landing/hair-transplant/{location}/outstation',
+        ],
         'hair-treatments' => [
             'slug'                  => 'hair-treatments',
             'service'               => 'Hair Loss treatment',
@@ -177,16 +207,56 @@ class Landing extends BaseConfig
     public array $phoneOverrides = [];
 
     /**
+     * Outstation landing copy per location (districts / hero region).
+     *
+     * @var array<string, array{hero_region: string, serving_title: string, clinic_option_label: string, districts: list<string>}>
+     */
+    public array $outstationByLocation = [
+        'bangalore' => [
+            'hero_region'         => 'Bangalore (Electronic City, Whitefield, Koramangala, HSR Layout, Marathahalli and beyond)',
+            'serving_title'       => 'Serving Patients Across Bangalore',
+            'clinic_option_label' => 'Bangalore (Serving All Bangalore Areas)',
+            'districts'           => [
+                'Electronic City', 'Whitefield', 'Koramangala', 'HSR Layout', 'Marathahalli',
+                'Sarjapur Road', 'Jayanagar', 'JP Nagar', 'Bannerghatta Road', 'Yelahanka',
+                'Hebbal', 'BTM Layout',
+            ],
+        ],
+        'delhi' => [
+            'hero_region'         => 'NCR & Nearby (Gurugram, Noida, Ghaziabad, Faridabad, Meerut and beyond)',
+            'serving_title'       => 'Serving Patients Across NCR & Nearby',
+            'clinic_option_label' => 'Delhi (Serving NCR & Nearby Patients)',
+            'districts'           => [
+                'Gurugram', 'Noida', 'Ghaziabad', 'Faridabad', 'Meerut', 'Panipat', 'Sonipat',
+                'Rohtak', 'Karnal', 'Agra', 'Aligarh', 'Moradabad', 'Hisar', 'Jaipur',
+            ],
+        ],
+        'ludhiana' => [
+            'hero_region'         => 'Punjab & Nearby (Chandigarh, Jalandhar, Amritsar, Patiala, Bathinda and beyond)',
+            'serving_title'       => 'Serving Patients Across Punjab & Nearby',
+            'clinic_option_label' => 'Ludhiana (Serving Punjab & Nearby Patients)',
+            'districts'           => [
+                'Chandigarh', 'Jalandhar', 'Amritsar', 'Patiala', 'Bathinda', 'Mohali',
+                'Panchkula', 'Ambala', 'Hoshiarpur', 'Phagwara', 'Shimla', 'Jammu',
+            ],
+        ],
+    ];
+
+    /**
      * Per-page WhatsApp link overrides (replaces the generated wa.me URL).
      * Key: "{pageType}.{location}"
      *
      * @var array<string, string>
      */
     public array $waUrlOverrides = [
-        'hair-transplant.delhi'              => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant.bangalore'          => 'https://wa.akclinics.com/AKC1285',
-        'hair-transplant-candidacy.delhi'     => 'https://wa.akclinics.com/AKC5192',
-        'hair-transplant-candidacy.bangalore' => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant.delhi'                => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant.bangalore'            => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant-candidacy.delhi'       => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant-candidacy.bangalore'   => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant-city-cost.delhi'       => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant-city-cost.bangalore'   => 'https://wa.akclinics.com/AKC1285',
+        'hair-transplant-outstation.delhi'      => 'https://wa.akclinics.com/AKC5192',
+        'hair-transplant-outstation.bangalore'  => 'https://wa.akclinics.com/AKC1285',
     ];
 
     /**
@@ -205,6 +275,12 @@ class Landing extends BaseConfig
         'hair-transplant-candidacy.delhi'      => '158',
         'hair-transplant-candidacy.bangalore'  => '170',
         'hair-transplant-candidacy.ludhiana'   => '164',
+        'hair-transplant-city-cost.delhi'      => '158',
+        'hair-transplant-city-cost.bangalore'  => '170',
+        'hair-transplant-city-cost.ludhiana'   => '164',
+        'hair-transplant-outstation.delhi'     => '158',
+        'hair-transplant-outstation.bangalore' => '170',
+        'hair-transplant-outstation.ludhiana'  => '164',
         'hair-treatments.delhi'                => '159',
         'hair-treatments.bangalore'            => '171',
         'hair-treatments.ludhiana'             => '165',
@@ -249,6 +325,36 @@ class Landing extends BaseConfig
             'title'       => 'Am I a Candidate for Hair Transplant? | AK Clinics Ludhiana',
             'description' => 'Doctor-led candidacy assessment for hair transplant in Ludhiana — Norwood grade, donor area, diffuse thinning and repair cases evaluated by AK Clinics.',
             'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/ludhiana/candidacy',
+        ],
+        'hair-transplant-city-cost.delhi' => [
+            'title'       => 'Hair Transplant Cost in Delhi | AK Clinics',
+            'description' => 'Hair transplant cost in Delhi starts from Rs 60,000 onwards. Transparent pricing, 0% EMI options, get your estimate after a doctor assessment at AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/delhi/cost',
+        ],
+        'hair-transplant-city-cost.bangalore' => [
+            'title'       => 'Hair Transplant Cost in Bangalore | AK Clinics',
+            'description' => 'Hair transplant cost in Bangalore starts from Rs 60,000 onwards. Transparent pricing, 0% EMI options, get your estimate after a doctor assessment at AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/bangalore/cost',
+        ],
+        'hair-transplant-city-cost.ludhiana' => [
+            'title'       => 'Hair Transplant Cost in Ludhiana | AK Clinics',
+            'description' => 'Hair transplant cost in Ludhiana starts from Rs 60,000 onwards. Transparent pricing, 0% EMI options, get your estimate after a doctor assessment at AK Clinics.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/ludhiana/cost',
+        ],
+        'hair-transplant-outstation.bangalore' => [
+            'title'       => 'Hair Transplant Clinic Near You in Bangalore | AK Clinics',
+            'description' => 'Travelling from Electronic City, Whitefield, Koramangala or elsewhere in Bangalore? Start with a virtual consultation at AK Clinics Indiranagar before you visit.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/bangalore/outstation',
+        ],
+        'hair-transplant-outstation.delhi' => [
+            'title'       => 'Hair Transplant for NCR & Outstation Patients | AK Clinics Delhi',
+            'description' => 'Travelling from Gurugram, Noida, Ghaziabad, Faridabad or elsewhere near NCR? Start with a virtual consultation at AK Clinics Delhi before you travel.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/delhi/outstation',
+        ],
+        'hair-transplant-outstation.ludhiana' => [
+            'title'       => 'Hair Transplant for Outstation Patients | AK Clinics Ludhiana',
+            'description' => 'Travelling from Chandigarh, Jalandhar, Amritsar or elsewhere near Ludhiana? Start with a virtual consultation at AK Clinics before you visit.',
+            'canonical'   => 'https://hair.akclinics.com/landing/hair-transplant/ludhiana/outstation',
         ],
         'hair-transplant-cost.delhi' => [
             'title'       => 'Hair Transplant Cost in Delhi – Get Exact Price & Free Assessment | AK Clinics',
@@ -311,10 +417,12 @@ class Landing extends BaseConfig
      * @var array<string, int|null>
      */
     public array $procedureCategoryIds = [
-        'hair-transplant'            => 4,
-        'hair-transplant-cost'       => 4,
-        'hair-transplant-candidacy'  => 4,
-        'hair-treatments'            => 5,
-        'laser-hair-removal'         => 3,
+        'hair-transplant'             => 4,
+        'hair-transplant-cost'        => 4,
+        'hair-transplant-candidacy'   => 4,
+        'hair-transplant-city-cost'   => 4,
+        'hair-transplant-outstation'  => 4,
+        'hair-treatments'             => 5,
+        'laser-hair-removal'          => 3,
     ];
 }
