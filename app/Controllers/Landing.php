@@ -45,8 +45,8 @@ class Landing extends BaseController
         if ($back !== '') {
             // Only allow internal relative landing paths
             $back = '/' . ltrim($back, '/');
-            if (preg_match('#^/(landing/)?hair-transplant/(delhi|bangalore|ludhiana)/candidacy/?$#', $back)
-                || preg_match('#^/(landing/)?(hair-transplant|hair-transplant-cost|hair-transplant-candidacy|hair-treatments|laser-hair-removal)/(delhi|bangalore|ludhiana)/?$#', $back)
+            if (preg_match('#^/(landing/)?hair-transplant/(delhi|bangalore|ludhiana)/(candidacy|cost|outstation)/?$#', $back)
+                || preg_match('#^/(landing/)?(hair-transplant|hair-transplant-cost|hair-transplant-candidacy|hair-transplant-city-cost|hair-transplant-outstation|hair-treatments|laser-hair-removal)/(delhi|bangalore|ludhiana)/?$#', $back)
             ) {
                 $backUrl = site_url(ltrim($back, '/'));
             }

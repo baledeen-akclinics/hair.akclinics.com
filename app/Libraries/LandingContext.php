@@ -76,6 +76,13 @@ class LandingContext
             $landingPageUrl = site_url($pageType . '/' . $location);
         }
 
+        $outstation = $this->config->outstationByLocation[$location] ?? [
+            'hero_region'         => $loc['name'],
+            'serving_title'       => 'Serving Patients Near ' . $loc['name'],
+            'clinic_option_label' => $loc['name'],
+            'districts'           => [],
+        ];
+
         return [
             'location'              => $loc,
             'page'                  => $page,
@@ -97,6 +104,7 @@ class LandingContext
             'city'                  => $loc['name'],
             'submit_url'            => site_url('submit-lead'),
             'thanks_url'            => site_url('thank-you'),
+            'outstation'            => $outstation,
         ];
     }
 }
